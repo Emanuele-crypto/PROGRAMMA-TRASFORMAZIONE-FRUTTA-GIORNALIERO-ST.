@@ -971,10 +971,10 @@
          function calculateAutoYields(agrume) {
              const yields = {
                  'LIMONE': { prima: 30, seconda: 10, torchiato: 5 },
-                 'ARANCIA': { prima: 35, seconda: 12, torchiato: 6 },
-                 'MANDARINO': { prima: 42, seconda: 10, torchiato: 4 },
-                 'POMPELMO': { prima: 30, seconda: 15, torchiato: 6 },
-                 'BERGAMOTTO': { prima: 30, seconda: 8, torchiato: 3 }
+                 'ARANCIA': { prima: 35, seconda: 0, torchiato: 6 },
+                 'MANDARINO': { prima: 42, seconda: 0, torchiato: 4 },
+                 'POMPELMO': { prima: 30, seconda: 0, torchiato: 6 },
+                 'BERGAMOTTO': { prima: 30, seconda: 0, torchiato: 3 }
              };
              return yields[agrume] || { prima: 45, seconda: 10, torchiato: 4 };
          }
