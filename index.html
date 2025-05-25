@@ -1829,65 +1829,237 @@
              });
          }
          
-         function updateStatistics() {
-             const programData = collectProgramData();
-             
-             // Aggiorna sommario
-             const summaryHtml = `
-                 <div class="summary-item">
-                     <div class="summary-value">${programData.fornitori.length}</div>
-                     <div class="summary-label">Fornitori Totali</div>
-                 </div>
-                 <div class="summary-item">
-                     <div class="summary-value">${programData.trasformataTotale.toLocaleString()}</div>
-                     <div class="summary-label">Kg Trasformati</div>
-                 </div>
-                 <div class="summary-item">
-                     <div class="summary-value">${programData.giacenzaTotale.toLocaleString()}</div>
-                     <div class="summary-label">Kg Giacenza</div>
-                 </div>
-                 <div class="summary-item">
-                     <div class="summary-value">${calculateTotalYield(programData).toFixed(1)}%</div>
-                     <div class="summary-label">Resa Media Totale</div>
-                 </div>
-             `;
-             $('#stats-summary').html(summaryHtml);
-             
-             // Aggiorna grafici
-             updateChartsData(programData);
-         }
-         
-         function calculateTotalYield(data) {
-             let totalYield = 0;
-             let count = 0;
-             
-             data.fornitori.forEach(f => {
-                 if (f.quantitaTrasformata > 0) {
-                     totalYield += f.rese.prima + f.rese.seconda + f.rese.torchiato;
-                     count++;
-                 }
-             });
-             
-             return count > 0 ? totalYield / count : 0;
-         }
-         
-         function updateChartsData(data) {
-             // Aggiorna grafico fornitori
-             const fornitoriLabels = [];
-             const fornitoriData = [];
-             
-             data.fornitori.forEach(f => {
-                 const nome = f.nome === 'ALTRO' ? f.altroNome : f.nome;
-                 if (nome && f.quantitaTrasformata > 0) {
-                     fornitoriLabels.push(nome);
-                     fornitoriData.push(f.quantitaTrasformata);
-                 }
-             });
-             
-             charts.fornitori.data.labels = fornitoriLabels;
-             charts.fornitori.data.datasets[0].data = fornitoriData;
-             charts.fornitori.update();
-             
+        function updateChartsData(data) {
+    // Grafico fornitori (già funzionante)
+    const fornitoriLabels = [];
+    const fornitoriData = [];
+    
+    data.fornitori.forEach(f => {
+        const nome = f.nome === 'ALTRO' ? f.altroNome : f.nome;
+        if (nome && f.quantitaTrasformata > 0) {
+            fornitoriLabels.push(nome);
+            fornitoriData.push(f.quantitaTrasformata);
+        }
+    });
+    
+    charts.fornitori.data.labels = fornitoriLabels;
+    charts.fornitori.data.datasets[0].data = fornitoriData;
+    charts.fornitori.update();
+    
+    // Grafico rese medie (già funzionante)
+    let resePrima = 0, reseSeconda = 0, reseTorchiato = 0;
+    let countRese = 0;
+    
+    data.fornitori.forEach(f => {
+        if (f.quantitaTrasformata > 0) {
+            resePrima += f.rese.prima;
+            reseSeconda += f.rese.seconda;
+            reseTorchiato += f.rese.torchiato;
+            countRese++;
+        }
+    });
+    
+    if (countRese > 0) {
+        charts.rese.data.datasets[0].data = [
+            (resePrima / countRese).toFixed(1),
+            (reseSeconda / countRese).toFixed(1),
+            (reseTorchiato / countRese).toFixed(1)
+        ];
+    }
+    charts.rese.update();
+    
+    // Grafico certificazioni (già funzionante)
+    const certMap = {};
+    data.fornitori.forEach(f => {
+        if (f.certificazione) {
+            certMap[f.certificazione] = (certMap[f.certificazione] || 0) + 1;
+        }
+    });
+    
+    charts.certificazioni.data.labels = Object.keys(certMap);
+    charts.certificazioni.data.datasets[0].data = Object.values(certMap);
+    charts.certificazioni.update();
+    
+    // GRAFICO TIMELINE PRODUZIONE
+    const timelineLabels = [];
+    const timelineData = [];
+    
+    // Ordina fornitori per orario di inizio
+    const fornitoriOrdinati = data.fornitori.filter(f => f.orarioInizio).sort((a, b) => {
+        const timeA = a.orarioInizio.split(':').map(n => parseInt(n));
+        const timeB = b.orarioInizio.split(':').map(n => parseInt(n));
+        return (timeA[0] * 60 + timeA[1]) - (timeB[0] * 60 + timeB[1]);
+    });
+    
+    // Crea serie temporale oraria
+    if (fornitoriOrdinati.length > 0) {
+        // Trova orario minimo e massimo
+        let minOra = 24, maxOra = 0;
+        fornitoriOrdinati.forEach(f => {
+            const oraInizio = parseInt(f.orarioInizio.split(':')[0]);
+            minOra = Math.min(minOra, oraInizio);
+            
+            const oraFineStr = f.orarioFineDisplay || '';
+            const oraFineMatch = oraFineStr.match(/(\d{2}):(\d{2})/);
+            if (oraFineMatch) {
+                let oraFine = parseInt(oraFineMatch[1]);
+                // Se c'è indicazione del giorno successivo, aggiungi 24
+                if (oraFineStr.includes('del giorno')) {
+                    oraFine += 24;
+                }
+                maxOra = Math.max(maxOra, oraFine);
+            }
+        });
+        
+        // Crea etichette orarie e calcola produzione per ogni ora
+        for (let ora = minOra; ora <= maxOra; ora++) {
+            const oraLabel = ora < 24 ? `${ora}:00` : `${ora-24}:00 (+1)`;
+            timelineLabels.push(oraLabel);
+            
+            // Calcola produzione in questa ora
+            let produzioneOra = 0;
+            fornitoriOrdinati.forEach(f => {
+                if (f.portataImpianto > 0 && f.orarioInizio) {
+                    const [oraInizio, minInizio] = f.orarioInizio.split(':').map(n => parseInt(n));
+                    const inizioMinuti = oraInizio * 60 + minInizio;
+                    
+                    const durataTotaleMinuti = Math.round((f.quantitaTrasformata / f.portataImpianto) * 60);
+                    const fineMinuti = inizioMinuti + durataTotaleMinuti;
+                    
+                    const oraCorrenteInizio = ora * 60;
+                    const oraCorrenteFine = (ora + 1) * 60;
+                    
+                    // Calcola sovrapposizione
+                    if (fineMinuti > oraCorrenteInizio && inizioMinuti < oraCorrenteFine) {
+                        const overlapInizio = Math.max(inizioMinuti, oraCorrenteInizio);
+                        const overlapFine = Math.min(fineMinuti, oraCorrenteFine);
+                        const overlapMinuti = overlapFine - overlapInizio;
+                        
+                        if (overlapMinuti > 0) {
+                            produzioneOra += (f.portataImpianto * overlapMinuti / 60);
+                        }
+                    }
+                }
+            });
+            
+            timelineData.push(produzioneOra.toFixed(0));
+        }
+    }
+    
+    charts.timeline.data.labels = timelineLabels;
+    charts.timeline.data.datasets[0].data = timelineData;
+    charts.timeline.update();
+    
+    // GRAFICO EFFICIENZA LINEE
+    const lineeMap = {};
+    const lineeEfficienzaMap = {};
+    
+    data.fornitori.forEach(f => {
+        if (f.lineaTrasformazione && f.portataImpianto > 0) {
+            if (!lineeMap[f.lineaTrasformazione]) {
+                lineeMap[f.lineaTrasformazione] = {
+                    quantitaTotale: 0,
+                    tempoTotale: 0,
+                    portataNominale: f.portataImpianto
+                };
+            }
+            
+            lineeMap[f.lineaTrasformazione].quantitaTotale += f.quantitaTrasformata;
+            
+            // Calcola tempo in ore
+            const tempo = f.quantitaTrasformata / f.portataImpianto;
+            lineeMap[f.lineaTrasformazione].tempoTotale += tempo;
+            
+            // Aggiorna portata nominale se maggiore
+            if (f.portataImpianto > lineeMap[f.lineaTrasformazione].portataNominale) {
+                lineeMap[f.lineaTrasformazione].portataNominale = f.portataImpianto;
+            }
+        }
+    });
+    
+    // Calcola efficienza per ogni linea
+    const lineeLabels = [];
+    const efficienzaData = [];
+    
+    Object.keys(lineeMap).forEach(linea => {
+        lineeLabels.push(linea);
+        
+        // Efficienza = (quantità prodotta / tempo) / portata nominale * 100
+        const dati = lineeMap[linea];
+        if (dati.tempoTotale > 0) {
+            const portataEffettiva = dati.quantitaTotale / dati.tempoTotale;
+            const efficienza = (portataEffettiva / dati.portataNominale) * 100;
+            efficienzaData.push(Math.min(efficienza, 100).toFixed(1));
+        } else {
+            efficienzaData.push(0);
+        }
+    });
+    
+    charts.efficienza.data.labels = lineeLabels;
+    charts.efficienza.data.datasets[0].data = efficienzaData;
+    charts.efficienza.update();
+    
+    // GRAFICO ANALISI DESTINAZIONI
+    const destinazioniMap = {
+        prima: {},
+        seconda: {},
+        torchiato: {}
+    };
+    
+    // Raccogli tutte le destinazioni
+    data.fornitori.forEach(f => {
+        // Destinazioni prima (possono essere multiple)
+        if (f.destinazioni.prima) {
+            const destArray = f.destinazioni.prima.split(', ');
+            destArray.forEach(dest => {
+                if (dest) {
+                    destinazioniMap.prima[dest] = (destinazioniMap.prima[dest] || 0) + (f.quantitaProdotti.prima / destArray.length);
+                }
+            });
+        }
+        
+        // Destinazioni seconda
+        if (f.destinazioni.seconda) {
+            destinazioniMap.seconda[f.destinazioni.seconda] = (destinazioniMap.seconda[f.destinazioni.seconda] || 0) + f.quantitaProdotti.seconda;
+        }
+        
+        // Destinazioni torchiato
+        if (f.destinazioni.torchiato) {
+            destinazioniMap.torchiato[f.destinazioni.torchiato] = (destinazioniMap.torchiato[f.destinazioni.torchiato] || 0) + f.quantitaProdotti.torchiato;
+        }
+    });
+    
+    // Crea set di tutte le destinazioni uniche
+    const tutteDestinazioni = new Set();
+    Object.keys(destinazioniMap.prima).forEach(d => tutteDestinazioni.add(d));
+    Object.keys(destinazioniMap.seconda).forEach(d => tutteDestinazioni.add(d));
+    Object.keys(destinazioniMap.torchiato).forEach(d => tutteDestinazioni.add(d));
+    
+    const destinazioniLabels = Array.from(tutteDestinazioni).sort();
+    
+    // Prepara datasets per grafico a barre impilate
+    const datasets = [
+        {
+            label: 'Succo 1ª',
+            data: destinazioniLabels.map(dest => (destinazioniMap.prima[dest] || 0).toFixed(1)),
+            backgroundColor: '#28a745'
+        },
+        {
+            label: 'Succo 2ª',
+            data: destinazioniLabels.map(dest => (destinazioniMap.seconda[dest] || 0).toFixed(1)),
+            backgroundColor: '#ffc107'
+        },
+        {
+            label: 'Torchiato',
+            data: destinazioniLabels.map(dest => (destinazioniMap.torchiato[dest] || 0).toFixed(1)),
+            backgroundColor: '#17a2b8'
+        }
+    ];
+    
+    charts.destinazioni.data.labels = destinazioniLabels;
+    charts.destinazioni.data.datasets = datasets;
+    charts.destinazioni.update();
+}             
              // Aggiorna grafico rese medie
              let resePrima = 0, reseSeconda = 0, reseTorchiato = 0;
              let countRese = 0;
