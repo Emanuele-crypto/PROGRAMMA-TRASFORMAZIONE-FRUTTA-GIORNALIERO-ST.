@@ -109,8 +109,8 @@
           color: #212529;
       }
       
-      .btn-stats {
-          background: linear-gradient(135deg, #6f42c1, #8b5cf6);
+      .btn-info {
+          background: linear-gradient(135deg, #17a2b8, #20c997);
           border: none;
           border-radius: 8px;
           padding: 12px 25px;
@@ -119,9 +119,9 @@
           color: white;
       }
       
-      .btn-stats:hover {
+      .btn-info:hover {
           transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(111, 66, 193, 0.4);
+          box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
           color: white;
       }
       
@@ -276,66 +276,87 @@
           background-color: rgba(0,0,0,0.5);
           display: none;
           z-index: 1000;
-          overflow-y: auto;
       }
       
       .stats-content {
-          background: white;
-          margin: 50px auto;
-          padding: 40px;
+          position: relative;
+          background-color: white;
+          margin: 2% auto;
+          padding: 20px;
           width: 90%;
-          max-width: 1200px;
+          max-width: 1400px;
+          height: 90%;
           border-radius: 15px;
-          box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+          overflow-y: auto;
       }
       
       .stats-header {
+          background: linear-gradient(135deg, #1e3c72, #2a5298);
+          color: white;
+          padding: 20px;
+          border-radius: 10px;
+          margin-bottom: 20px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 30px;
       }
       
       .close-stats {
-          font-size: 30px;
+          color: white;
+          font-size: 28px;
+          font-weight: bold;
           cursor: pointer;
-          color: #6c757d;
       }
       
       .close-stats:hover {
-          color: #dc3545;
-      }
-      
-      .chart-container {
-          position: relative;
-          height: 400px;
-          margin-bottom: 40px;
+          color: #f0f0f0;
       }
       
       .stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
           gap: 20px;
       }
       
-      .stat-card {
-          background: #f8f9fa;
-          padding: 20px;
+      .stats-card {
+          background: white;
           border-radius: 10px;
-          text-align: center;
+          padding: 20px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
           border-left: 4px solid #2a5298;
       }
       
-      .stat-value {
+      .chart-container {
+          position: relative;
+          height: 300px;
+          margin-top: 20px;
+      }
+      
+      .stats-summary {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 15px;
+          margin-bottom: 30px;
+      }
+      
+      .summary-item {
+          background: linear-gradient(135deg, #e7f3ff, #f0f8ff);
+          padding: 20px;
+          border-radius: 10px;
+          text-align: center;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      }
+      
+      .summary-value {
           font-size: 36px;
-          font-weight: 700;
+          font-weight: bold;
           color: #1e3c72;
       }
       
-      .stat-label {
+      .summary-label {
           font-size: 14px;
           color: #6c757d;
-          margin-top: 10px;
+          margin-top: 5px;
       }
   </style>
 </head>
@@ -447,7 +468,6 @@
                           <th>Q. Da trasformare (kg)</th>
                           <th>Giacenza (kg)</th>
                           <th>Certificazione</th>
-                          <th>Varietà</th>
                           <th>Linea</th>
                           <th>Inizio</th>
                           <th>Fine</th>
@@ -470,8 +490,8 @@
           <button type="button" class="btn btn-outline-secondary btn-lg me-3" id="anteprima-stampa">
               <i class="bi bi-printer"></i> Anteprima Stampa
           </button>
-          <button type="button" class="btn btn-stats btn-lg me-3" id="apri-statistiche">
-              <i class="bi bi-bar-chart-line"></i> Statistiche
+          <button type="button" class="btn btn-info btn-lg me-3" id="apri-statistiche">
+              <i class="bi bi-bar-chart-line"></i> Statistiche Interattive
           </button>
           <button type="button" class="btn btn-outline-danger btn-lg" id="reset-programma">
               <i class="bi bi-arrow-clockwise"></i> Reset Programma
@@ -483,47 +503,55 @@
   <div id="stats-modal" class="stats-modal">
       <div class="stats-content">
           <div class="stats-header">
-              <h2><i class="bi bi-bar-chart-line"></i> Statistiche Produzione</h2>
+              <h2><i class="bi bi-bar-chart-line"></i> Statistiche Interattive Produzione</h2>
               <span class="close-stats">&times;</span>
           </div>
           
+          <div class="stats-summary" id="stats-summary">
+              <!-- Sommario statistiche caricate dinamicamente -->
+          </div>
+          
           <div class="stats-grid">
-              <div class="stat-card">
-                  <div class="stat-value" id="stat-totale-kg">0</div>
-                  <div class="stat-label">Totale Trasformato (kg)</div>
+              <div class="stats-card">
+                  <h4>Distribuzione Produzione per Fornitore</h4>
+                  <div class="chart-container">
+                      <canvas id="chartFornitori"></canvas>
+                  </div>
               </div>
-              <div class="stat-card">
-                  <div class="stat-value" id="stat-fornitori">0</div>
-                  <div class="stat-label">Numero Fornitori</div>
+              
+              <div class="stats-card">
+                  <h4>Rese Medie per Tipo Prodotto</h4>
+                  <div class="chart-container">
+                      <canvas id="chartRese"></canvas>
+                  </div>
               </div>
-              <div class="stat-card">
-                  <div class="stat-value" id="stat-resa-media">0%</div>
-                  <div class="stat-label">Resa Media 1ª</div>
+              
+              <div class="stats-card">
+                  <h4>Distribuzione Certificazioni</h4>
+                  <div class="chart-container">
+                      <canvas id="chartCertificazioni"></canvas>
+                  </div>
               </div>
-              <div class="stat-card">
-                  <div class="stat-value" id="stat-bio">0%</div>
-                  <div class="stat-label">Percentuale BIO</div>
+              
+              <div class="stats-card">
+                  <h4>Timeline Produzione</h4>
+                  <div class="chart-container">
+                      <canvas id="chartTimeline"></canvas>
+                  </div>
               </div>
-          </div>
-          
-          <div class="mt-4">
-              <h4>Distribuzione per Fornitore</h4>
-              <div class="chart-container">
-                  <canvas id="chart-fornitori"></canvas>
+              
+              <div class="stats-card">
+                  <h4>Efficienza Linee di Produzione</h4>
+                  <div class="chart-container">
+                      <canvas id="chartEfficienza"></canvas>
+                  </div>
               </div>
-          </div>
-          
-          <div class="mt-4">
-              <h4>Distribuzione per Certificazione</h4>
-              <div class="chart-container">
-                  <canvas id="chart-certificazioni"></canvas>
-              </div>
-          </div>
-          
-          <div class="mt-4">
-              <h4>Rese per Tipo di Prodotto</h4>
-              <div class="chart-container">
-                  <canvas id="chart-rese"></canvas>
+              
+              <div class="stats-card">
+                  <h4>Analisi Destinazioni Prodotti</h4>
+                  <div class="chart-container">
+                      <canvas id="chartDestinazioni"></canvas>
+                  </div>
               </div>
           </div>
       </div>
@@ -584,13 +612,6 @@
                       <option value="ALTRO">ALTRO</option>
                   </select>
                   <input type="text" class="form-control mt-2 altra-certificazione hidden-field" placeholder="Specifica altra certificazione">
-              </div>
-              
-              <div class="col-md-6">
-                  <label class="form-label">Varietà</label>
-                  <select class="form-select varieta-prodotto" multiple>
-                      <option value="">Seleziona varietà</option>
-                  </select>
               </div>
               
               <!-- Parametri lavorazione -->
@@ -693,14 +714,14 @@
                           <option value="CISTERNA EF">CISTERNA EF</option>
                           <option value="CISTERNA VK">CISTERNA VK</option>
                           <option value="CISTERNA GS">CISTERNA GS</option>
-                          <option value="CISTERNA CARTH.">CISTERNA CARTH.</option>
-                          <option value="CONCENTRATO">CONCENTRATO</option>
-                          <option value="ALTRO">ALTRO</option>
-                      </select>
-                      <select class="form-select mt-2 bx-concentrato hidden-field">
-                          <option value="">Seleziona °BX</option>
-                          <option value="32">32 °BX</option
-                                                     <option value="40">40 °BX</option>
+                         <option value="CISTERNA CARTH.">CISTERNA CARTH.</option>
+                         <option value="CONCENTRATO">CONCENTRATO</option>
+                         <option value="ALTRO">ALTRO</option>
+                     </select>
+                     <select class="form-select mt-2 bx-concentrato hidden-field">
+                         <option value="">Seleziona °BX</option>
+                         <option value="32">32 °BX</option>
+                         <option value="40">40 °BX</option>
                          <option value="45">45 °BX</option>
                          <option value="48">48 °BX</option>
                          <option value="55">55 °BX</option>
@@ -739,7 +760,7 @@
                      <label class="form-label">Destinazione Torchiato</label>
                      <select class="form-select destinazione-torchiato">
                          <option value="">Seleziona destinazione</option>
-                         <option value="NAT IN TINI">NAT IN TINI</option>                         
+                         <option value="NAT IN TINI">NAT IN TINI</option>
                          <option value="F.F.">F.F.</option>
                          <option value="F.T.C">F.T.C</option>
                          <option value="FBL">FBL</option>
@@ -921,9 +942,8 @@
          let lastCombinationSuppliers = '';
          let sumDetailsSeconda = {};
          let sumDetailsTorchiato = {};
-         let chartFornitori = null;
-         let chartCertificazioni = null;
-         let chartRese = null;
+         let chartsInitialized = false;
+         let charts = {};
          
          // Inizializzazione data corrente e ultima revisione
          function initCurrentDate() {
@@ -957,93 +977,6 @@
                  'BERGAMOTTO': { prima: 30, seconda: 8, torchiato: 3 }
              };
              return yields[agrume] || { prima: 45, seconda: 10, torchiato: 4 };
-         }
-         
-         // Aggiorna opzioni varietà in base a tipo agrume e certificazione
-         function updateVarietaOptions(supplierElement) {
-             const agrume = $('#tipo-agrume-giornaliero').val();
-             const certificazione = supplierElement.find('.certificazione-prodotto').val();
-             const varietaSelect = supplierElement.find('.varieta-prodotto');
-             
-             varietaSelect.empty();
-             
-             let options = [];
-             
-             if (agrume === 'LIMONE') {
-                 if (certificazione === 'TRACCIATO') {
-                     options = ['AZ.C.ARCO.'];
-                 } else {
-                     options = ['VARIE', 'VERDELLO', 'BIANCHETTO', 'FEMMINELLO', 'INTERDONATO', 'MONACHELLO'];
-                 }
-             } else if (agrume === 'MANDARINO') {
-                 if (certificazione === 'TRACCIATO') {
-                     options = ['M.B.T.F.', 'AZ.T.C.'];
-                 } else {
-                     options = ['VERDE', 'CIACULLI', 'CALABRIA', 'SICILIA'];
-                 }
-             } else if (agrume === 'ARANCIA') {
-                 options = ['VARIE', 'BIONDA', 'SANGUINELLO', 'MORO', 'TAROCCO'];
-             }
-             
-             options.forEach(option => {
-                 varietaSelect.append(`<option value="${option}">${option}</option>`);
-             });
-             
-             // Inizializza Select2 per varietà
-             if (agrume === 'ARANCIA') {
-                 varietaSelect.select2({
-                     placeholder: "Seleziona varietà (multiple)",
-                     allowClear: true
-                 });
-             } else {
-                 varietaSelect.select2('destroy');
-                 varietaSelect.removeAttr('multiple');
-             }
-         }
-         
-         // Auto-compilazione in base alla destinazione
-         function autoFillByDestination(supplierElement, productType, destinationValue) {
-             const container = productType === 'prima' ? supplierElement.find('.destinazione-prima').parent().parent() :
-                              productType === 'seconda' ? supplierElement.find('.destinazione-seconda').parent().parent() :
-                              supplierElement.find('.destinazione-torchiato').parent().parent();
-             
-             // Funzione helper per impostare valori
-             function setProductValues(pastorizzato, tenorePolpa, brix, biologico, conservato) {
-                 if (productType === 'prima') {
-                     supplierElement.find('.pastorizzato-prima').val(pastorizzato);
-                     supplierElement.find('.tenore-polpa-prima').val(tenorePolpa);
-                     supplierElement.find('.brix-prima').val(brix);
-                     supplierElement.find('.bio-prima').val(biologico);
-                     supplierElement.find('.conservato-prima').val(conservato);
-                 } else if (productType === 'seconda') {
-                     supplierElement.find('.pastorizzato-seconda').val(pastorizzato);
-                     supplierElement.find('.tenore-polpa-seconda').val(tenorePolpa);
-                     supplierElement.find('.brix-seconda').val(brix);
-                     supplierElement.find('.conservato-seconda').val(conservato);
-                 } else if (productType === 'torchiato') {
-                     supplierElement.find('.pastorizzato-torchiato').val(pastorizzato);
-                     supplierElement.find('.tenore-polpa-torchiato').val(tenorePolpa);
-                     supplierElement.find('.brix-torchiato').val(brix);
-                     supplierElement.find('.conservato-torchiato').val(conservato);
-                 }
-             }
-             
-             // Logica di auto-compilazione
-             if (destinationValue === 'NAT IN TINI') {
-                 setProductValues('SI', 'SEMICLEAR', 'NAT', 'NO', 'SI');
-             } else if (['PET 100', 'PET 200', 'PET 480'].includes(destinationValue)) {
-                 setProductValues('SI', 'STANDARD', 'NAT', 'NO', 'NO');
-             } else if (['ACMA', 'REX', 'GOGLIO', 'VASCHETTE', 'VASCHETTE ZUCCHERATE'].includes(destinationValue)) {
-                 setProductValues('NO', 'STANDARD', 'NAT', 'NO', 'NO');
-             } else if (destinationValue === 'CISTERNA P') {
-                 setProductValues('SI', 'SEMICLEAR', 'NAT', 'SI', 'NO');
-             } else if (destinationValue === 'CONCENTRATO') {
-                 if (productType === 'prima') {
-                     setProductValues('SI', 'LIMPIDO', '48', 'SI', 'NO');
-                 } else {
-                     setProductValues('SI', 'SEMICLEAR', '45', 'NO', 'NO');
-                 }
-             }
          }
          
          // Mostra/nasconde sezione combinazioni
@@ -1286,7 +1219,7 @@
                  
                  alert(`Combinazione applicata! Quantità succo 1ª dell'ultimo fornitore incluso aggiornata a ${totale.toFixed(1)} kg\nFornitori combinati: ${lastCombinationSuppliers}`);
              } else {
-               alert('Nessun fornitore disponibile per applicare la combinazione');
+                 alert('Nessun fornitore disponibile per applicare la combinazione');
              }
          }
          
@@ -1361,9 +1294,6 @@
                  }
              });
              
-             // Inizializza varietà se necessario
-             updateVarietaOptions(newSupplier);
-             
              attachSupplierEvents(newSupplier);
              updateCombinazioneOptions();
              toggleCombinazioniSection();
@@ -1399,12 +1329,11 @@
                  
                  updateDestinationColors(supplierElement);
                  updateBioStyles(supplierElement);
-                 updateVarietaOptions(supplierElement);
                  updateSummaryTable();
              });
              
              // Gestione bio status per colori destinazione
-             supplierElement.find('.bio-prima').change(function() {
+       supplierElement.find('.bio-prima').change(function() {
                  updateDestinationColors(supplierElement);
              });
              
@@ -1449,7 +1378,7 @@
                  }
              });
              
-             // Gestione menu destinazioni multiple per succo 1ª con auto-compilazione
+             // Gestione menu destinazioni multiple per succo 1ª
              supplierElement.find('.destinazione-prima').on('change', function() {
                  const selectedValues = $(this).val() || [];
                  const container = $(this).parent();
@@ -1467,52 +1396,35 @@
                  } else {
                      altroField.addClass('hidden-field').val('');
                  }
-                 
-                 // Auto-compilazione per ogni valore selezionato
-                 selectedValues.forEach(value => {
-                     autoFillByDestination(supplierElement, 'prima', value);
-                 });
              });
              
-             // Gestione menu concentrato e altro destinazioni per seconda con auto-compilazione
+             // Gestione menu concentrato e altro destinazioni per seconda
              supplierElement.find('.destinazione-seconda').change(function() {
                  const container = $(this).parent();
                  const bxField = container.find('.bx-concentrato');
                  const altroField = container.find('.altra-destinazione');
-                 const value = $(this).val();
                  
-                 if (value === 'CONCENTRATO') {
+                 if ($(this).val() === 'CONCENTRATO') {
                      bxField.removeClass('hidden-field');
                      altroField.addClass('hidden-field').val('');
-                 } else if (value === 'ALTRO') {
+                 } else if ($(this).val() === 'ALTRO') {
                      altroField.removeClass('hidden-field');
                      bxField.addClass('hidden-field').val('');
                  } else {
                      bxField.addClass('hidden-field').val('');
                      altroField.addClass('hidden-field').val('');
-                 }
-                 
-                 // Auto-compilazione
-                 if (value) {
-                     autoFillByDestination(supplierElement, 'seconda', value);
                  }
              });
              
-             // Gestione menu destinazioni per torchiato con auto-compilazione
+             // Gestione menu destinazioni per torchiato (SENZA bx-concentrato)
              supplierElement.find('.destinazione-torchiato').change(function() {
                  const container = $(this).parent();
                  const altroField = container.find('.altra-destinazione');
-                 const value = $(this).val();
                  
-                 if (value === 'ALTRO') {
+                 if ($(this).val() === 'ALTRO') {
                      altroField.removeClass('hidden-field');
                  } else {
                      altroField.addClass('hidden-field').val('');
-                 }
-                 
-                 // Auto-compilazione
-                 if (value) {
-                     autoFillByDestination(supplierElement, 'torchiato', value);
                  }
              });
              
@@ -1669,7 +1581,7 @@
              supplierCount = newCount;
          }
          
-         // Aggiornamento tabella riepilogo con varietà
+         // Aggiornamento tabella riepilogo
          function updateSummaryTable() {
              const tableBody = $('#riepilogo-table tbody');
              tableBody.empty();
@@ -1683,8 +1595,6 @@
                  const quantitaTrasformata = $(this).find('.quantita-trasformata').val() || '0';
                  const giacenza = $(this).find('.giacenza-fornitore').val() || '0';
                  const certificazione = $(this).find('.certificazione-prodotto').val() || '';
-                 const varieta = $(this).find('.varieta-prodotto').val() || [];
-                 const varietaText = Array.isArray(varieta) ? varieta.join(', ') : varieta;
                  const linea = $(this).find('.linea-trasformazione').val() || '';
                  const orarioInizio = $(this).find('.orario-inizio').val() || '';
                  const orarioFineDisplay = $(this).find('.orario-fine-display').html() || '';
@@ -1709,7 +1619,6 @@
                              <td><span class="badge bg-warning">${quantitaTrasformata} kg</span></td>
                              <td><span class="badge bg-info">${giacenza} kg</span></td>
                              <td ${certificationClass}>${certificationBadge}</td>
-                             <td><small>${varietaText || '-'}</small></td>
                              <td><code ${lineaClass}>${linea}</code></td>
                              <td><span class="time-display">${orarioInizio}</span></td>
                              <td><span class="time-display">${orarioFineDisplay}</span></td>
@@ -1751,6 +1660,271 @@
              });
          }
          
+         // Gestione statistiche interattive
+         function openStatistics() {
+             $('#stats-modal').fadeIn();
+             if (!chartsInitialized) {
+                 initializeCharts();
+                 chartsInitialized = true;
+             }
+             updateStatistics();
+         }
+         
+         function closeStatistics() {
+             $('#stats-modal').fadeOut();
+         }
+         
+         function initializeCharts() {
+             // Inizializza i grafici
+             const ctxFornitori = document.getElementById('chartFornitori').getContext('2d');
+             const ctxRese = document.getElementById('chartRese').getContext('2d');
+             const ctxCertificazioni = document.getElementById('chartCertificazioni').getContext('2d');
+             const ctxTimeline = document.getElementById('chartTimeline').getContext('2d');
+             const ctxEfficienza = document.getElementById('chartEfficienza').getContext('2d');
+             const ctxDestinazioni = document.getElementById('chartDestinazioni').getContext('2d');
+             
+             // Grafico Fornitori
+             charts.fornitori = new Chart(ctxFornitori, {
+                 type: 'pie',
+                 data: {
+                     labels: [],
+                     datasets: [{
+                         label: 'Quantità trasformata (kg)',
+                         data: [],
+                         backgroundColor: [
+                             '#FF6384',
+                             '#36A2EB',
+                             '#FFCE56',
+                             '#4BC0C0',
+                             '#9966FF',
+                             '#FF9F40'
+                         ]
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             position: 'bottom'
+                         }
+                     }
+                 }
+             });
+             
+             // Grafico Rese
+             charts.rese = new Chart(ctxRese, {
+                 type: 'bar',
+                 data: {
+                     labels: ['Succo 1ª', 'Succo 2ª', 'Torchiato'],
+                     datasets: [{
+                         label: 'Resa Media %',
+                         data: [],
+                         backgroundColor: ['#28a745', '#ffc107', '#17a2b8']
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     scales: {
+                         y: {
+                             beginAtZero: true,
+                             max: 50
+                         }
+                     }
+                 }
+             });
+             
+             // Grafico Certificazioni
+             charts.certificazioni = new Chart(ctxCertificazioni, {
+                 type: 'doughnut',
+                 data: {
+                     labels: [],
+                     datasets: [{
+                         data: [],
+                         backgroundColor: [
+                             '#dc3545',
+                             '#28a745',
+                             '#ffc107',
+                             '#17a2b8',
+                             '#6c757d'
+                         ]
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false
+                 }
+             });
+             
+             // Grafico Timeline
+             charts.timeline = new Chart(ctxTimeline, {
+                 type: 'line',
+                 data: {
+                     labels: [],
+                     datasets: [{
+                         label: 'Produzione oraria (kg)',
+                         data: [],
+                         borderColor: '#2a5298',
+                         fill: false,
+                         tension: 0.1
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     scales: {
+                         y: {
+                             beginAtZero: true
+                         }
+                     }
+                 }
+             });
+             
+             // Grafico Efficienza Linee
+             charts.efficienza = new Chart(ctxEfficienza, {
+                 type: 'radar',
+                 data: {
+                     labels: [],
+                     datasets: [{
+                         label: 'Efficienza %',
+                         data: [],
+                         backgroundColor: 'rgba(42, 82, 152, 0.2)',
+                         borderColor: '#2a5298',
+                         pointBackgroundColor: '#2a5298'
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     scales: {
+                         r: {
+                             beginAtZero: true,
+                             max: 100
+                         }
+                     }
+                 }
+             });
+             
+             // Grafico Destinazioni
+             charts.destinazioni = new Chart(ctxDestinazioni, {
+                 type: 'bar',
+                 data: {
+                     labels: [],
+                     datasets: []
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     scales: {
+                         x: {
+                             stacked: true
+                         },
+                         y: {
+                             stacked: true,
+                             beginAtZero: true
+                         }
+                     }
+                 }
+             });
+         }
+         
+         function updateStatistics() {
+             const programData = collectProgramData();
+             
+             // Aggiorna sommario
+             const summaryHtml = `
+                 <div class="summary-item">
+                     <div class="summary-value">${programData.fornitori.length}</div>
+                     <div class="summary-label">Fornitori Totali</div>
+                 </div>
+                 <div class="summary-item">
+                     <div class="summary-value">${programData.trasformataTotale.toLocaleString()}</div>
+                     <div class="summary-label">Kg Trasformati</div>
+                 </div>
+                 <div class="summary-item">
+                     <div class="summary-value">${programData.giacenzaTotale.toLocaleString()}</div>
+                     <div class="summary-label">Kg Giacenza</div>
+                 </div>
+                 <div class="summary-item">
+                     <div class="summary-value">${calculateTotalYield(programData).toFixed(1)}%</div>
+                     <div class="summary-label">Resa Media Totale</div>
+                 </div>
+             `;
+             $('#stats-summary').html(summaryHtml);
+             
+             // Aggiorna grafici
+             updateChartsData(programData);
+         }
+         
+         function calculateTotalYield(data) {
+             let totalYield = 0;
+             let count = 0;
+             
+             data.fornitori.forEach(f => {
+                 if (f.quantitaTrasformata > 0) {
+                     totalYield += f.rese.prima + f.rese.seconda + f.rese.torchiato;
+                     count++;
+                 }
+             });
+             
+             return count > 0 ? totalYield / count : 0;
+         }
+         
+         function updateChartsData(data) {
+             // Aggiorna grafico fornitori
+             const fornitoriLabels = [];
+             const fornitoriData = [];
+             
+             data.fornitori.forEach(f => {
+                 const nome = f.nome === 'ALTRO' ? f.altroNome : f.nome;
+                 if (nome && f.quantitaTrasformata > 0) {
+                     fornitoriLabels.push(nome);
+                     fornitoriData.push(f.quantitaTrasformata);
+                 }
+             });
+             
+             charts.fornitori.data.labels = fornitoriLabels;
+             charts.fornitori.data.datasets[0].data = fornitoriData;
+             charts.fornitori.update();
+             
+             // Aggiorna grafico rese medie
+             let resePrima = 0, reseSeconda = 0, reseTorchiato = 0;
+             let countRese = 0;
+             
+             data.fornitori.forEach(f => {
+                 if (f.quantitaTrasformata > 0) {
+                     resePrima += f.rese.prima;
+                     reseSeconda += f.rese.seconda;
+                     reseTorchiato += f.rese.torchiato;
+                     countRese++;
+                 }
+             });
+             
+             if (countRese > 0) {
+                 charts.rese.data.datasets[0].data = [
+                     (resePrima / countRese).toFixed(1),
+                     (reseSeconda / countRese).toFixed(1),
+                     (reseTorchiato / countRese).toFixed(1)
+                 ];
+             }
+             charts.rese.update();
+             
+             // Aggiorna grafico certificazioni
+             const certMap = {};
+             data.fornitori.forEach(f => {
+                 if (f.certificazione) {
+                     certMap[f.certificazione] = (certMap[f.certificazione] || 0) + 1;
+                 }
+             });
+             
+             charts.certificazioni.data.labels = Object.keys(certMap);
+             charts.certificazioni.data.datasets[0].data = Object.values(certMap);
+             charts.certificazioni.update();
+             
+             // Altri aggiornamenti grafici...
+         }
+         
          // Eventi principali
          $('#tipo-agrume-giornaliero').change(function() {
              const agrume = $(this).val();
@@ -1762,7 +1936,6 @@
                      $(this).find('.resa-seconda').val(yields.seconda);
                      $(this).find('.resa-torchiato').val(yields.torchiato);
                      calculateYieldQuantities($(this));
-                     updateVarietaOptions($(this));
                  });
                  
                  updateTotals();
@@ -1787,6 +1960,23 @@
                  return;
              }
              addSupplier();
+         });
+         
+         // Pulsante apri statistiche
+         $('#apri-statistiche').click(function() {
+             openStatistics();
+         });
+         
+         // Chiudi modal statistiche
+         $('.close-stats').click(function() {
+             closeStatistics();
+         });
+         
+         // Chiudi modal cliccando fuori
+         $(window).click(function(event) {
+             if (event.target.id === 'stats-modal') {
+                 closeStatistics();
+             }
          });
          
          // Salvataggio programma
@@ -1837,7 +2027,7 @@
              return isValid;
          }
          
-         // Raccolta dati programma con varietà
+         // Raccolta dati programma
          function collectProgramData() {
              const data = {
                  tipoAgrume: $('#tipo-agrume-giornaliero').val(),
@@ -1854,7 +2044,6 @@
              
              $('.supplier-row').each(function() {
                  const destinazioniPrima = $(this).find('.destinazione-prima').val() || [];
-                 const varieta = $(this).find('.varieta-prodotto').val() || [];
                  const fornitore = {
                      nome: $(this).find('.nome-fornitore').val(),
                      altroNome: $(this).find('.altro-fornitore').val(),
@@ -1863,8 +2052,7 @@
                      giacenza: parseFloat($(this).find('.giacenza-fornitore').val()) || 0,
                      certificazione: $(this).find('.certificazione-prodotto').val(),
                      altraCertificazione: $(this).find('.altra-certificazione').val(),
-                     varieta: Array.isArray(varieta) ? varieta : [varieta],
-                     lineaTrasformazione: $(this).find('.linea-trasformazione').val(),
+                   lineaTrasformazione: $(this).find('.linea-trasformazione').val(),
                      portataImpianto: parseFloat($(this).find('.portata-impianto').val()) || 0,
                      orarioInizio: $(this).find('.orario-inizio').val(),
                      orarioFineDisplay: $(this).find('.orario-fine-display').html(),
@@ -1928,39 +2116,19 @@
          }
          
          // Anteprima stampa
-                       $('#anteprima-stampa').click(function() {
+         $('#anteprima-stampa').click(function() {
              const programData = collectProgramData();
              generatePrintPreview(programData);
          });
          
-         // Generazione anteprima stampa migliorata
+         // Generazione anteprima stampa MODIFICATA
          function generatePrintPreview(data) {
              const printWindow = window.open('', '_blank');
-             
-             // Calcola totali per succo 2ª e torchiato
-             let totalSeconda = 0;
-             let totalTorchiato = 0;
-             let detailsSeconda = [];
-             let detailsTorchiato = [];
-             
-             data.fornitori.forEach(fornitore => {
-                 const nomeFornitore = fornitore.nome === 'ALTRO' ? fornitore.altroNome : fornitore.nome;
-                 totalSeconda += fornitore.quantitaProdotti.seconda;
-                 totalTorchiato += fornitore.quantitaProdotti.torchiato;
-                 
-                 if (fornitore.quantitaProdotti.seconda > 0) {
-                     detailsSeconda.push(`${nomeFornitore}: ${fornitore.quantitaProdotti.seconda} kg`);
-                 }
-                 if (fornitore.quantitaProdotti.torchiato > 0) {
-                     detailsTorchiato.push(`${nomeFornitore}: ${fornitore.quantitaProdotti.torchiato} kg`);
-                 }
-             });
-             
              let printContent = `
                  <!DOCTYPE html>
                  <html>
                  <head>
-                     <title>Programma Produzione - ${data.dataLavorazione}</title>
+                     <title>Riepilogo Programma Giornaliero - ${data.dataLavorazione}</title>
                      <style>
                          * {
                              margin: 0;
@@ -1969,210 +2137,303 @@
                          }
                          
                          body { 
-                             font-family: 'Arial', sans-serif;
-                             background-color: #ffffff;
+                             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                             background-color: #f5f7fa;
                              color: #333;
-                             line-height: 1.4;
+                             line-height: 1.6;
                          }
                          
                          .container {
-                             max-width: 210mm; /* A4 width */
+                             max-width: 1200px;
                              margin: 0 auto;
-                             padding: 15px;
+                             padding: 20px;
                          }
                          
                          .header {
+                             background: linear-gradient(135deg, #1e3c72, #2a5298);
+                             color: white;
+                             padding: 40px;
                              text-align: center;
-                             border-bottom: 3px solid #1e3c72;
-                             padding-bottom: 15px;
-                             margin-bottom: 20px;
+                             border-radius: 15px;
+                             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                             margin-bottom: 40px;
                          }
                          
                          .header h1 {
-                             font-size: 20px;
-                             color: #1e3c72;
-                             margin-bottom: 5px;
+                             font-size: 32px;
+                             margin-bottom: 10px;
+                             text-transform: uppercase;
+                             letter-spacing: 2px;
+                         }
+                         
+                         .header h2 {
+                             font-size: 18px;
+                             font-weight: 400;
+                             opacity: 0.9;
+                             margin-bottom: 20px;
                          }
                          
                          .header-info {
                              display: flex;
-                             justify-content: space-around;
-                             margin-top: 10px;
-                             font-size: 14px;
-                         }
-                         
-                         .info-box {
-                             text-align: center;
-                             padding: 10px;
-                             background: #f0f0f0;
-                             border-radius: 5px;
-                             flex: 1;
-                             margin: 0 5px;
-                         }
-                         
-                         .info-box strong {
-                             display: block;
-                             color: #1e3c72;
-                             font-size: 12px;
-                         }
-                         
-                         .info-box span {
-                             font-size: 16px;
-                             font-weight: bold;
-                         }
-                         
-                         .content {
+                             justify-content: center;
+                             gap: 40px;
                              margin-top: 20px;
                          }
                          
-                         .fornitori-grid {
+                         .header-info-item {
+                             background: rgba(255,255,255,0.1);
+                             padding: 10px 20px;
+                             border-radius: 10px;
+                             backdrop-filter: blur(10px);
+                         }
+                         
+                         .header-info-item strong {
+                             display: block;
+                             font-size: 14px;
+                             opacity: 0.8;
+                         }
+                         
+                         .header-info-item span {
+                             font-size: 18px;
+                             font-weight: 600;
+                         }
+                         
+                         .supplier-grid {
                              display: grid;
-                             gap: 15px;
-                             margin-bottom: 20px;
+                             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                             gap: 25px;
+                             margin-bottom: 40px;
                          }
                          
-                         .fornitore-box {
-                             border: 1px solid #ddd;
-                             border-radius: 8px;
-                             padding: 15px;
-                             page-break-inside: avoid;
+                         .supplier-card {
+                             background: white;
+                             border-radius: 12px;
+                             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+                             overflow: hidden;
+                             transition: transform 0.3s ease;
                          }
                          
-                         .fornitore-header {
-                             display: flex;
-                             justify-content: space-between;
-                             align-items: center;
-                             border-bottom: 2px solid #1e3c72;
-                             padding-bottom: 10px;
+                         .supplier-card:hover {
+                             transform: translateY(-5px);
+                             box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+                         }
+                         
+                         .supplier-header {
+                             background: #f8f9fa;
+                             padding: 20px;
+                             border-bottom: 3px solid #2a5298;
+                         }
+                         
+                         .supplier-header.bio {
+                             border-bottom-color: #dc3545;
+                         }
+                         
+                         .supplier-name {
+                             font-size: 20px;
+                             font-weight: 600;
+                             color: #1e3c72;
                              margin-bottom: 10px;
                          }
                          
-                         .fornitore-name {
-                             font-size: 16px;
-                             font-weight: bold;
-                             color: #1e3c72;
-                         }
-                         
-                         .fornitore-bio {
+                         .supplier-name.bio {
                              color: #dc3545;
                          }
                          
-                         .time-info {
-                             background: #f5f5f5;
-                             padding: 8px;
-                             border-radius: 5px;
-                             font-size: 13px;
-                             text-align: center;
-                         }
-                         
-                         .prodotti-container {
+                         .supplier-info {
+                             display: flex;
+                             justify-content: space-between;
+                             align-items: center;
                              margin-top: 10px;
                          }
                          
-                         .prodotto-row {
-                             display: flex;
-                             align-items: center;
-                             padding: 8px;
-                             border-bottom: 1px solid #eee;
-                         }
-                         
-                         .prodotto-row:last-child {
-                             border-bottom: none;
-                         }
-                         
-                         .prodotto-label {
-                             flex: 1;
-                             font-weight: 600;
-                             color: #555;
-                         }
-                         
-                         .prodotto-value {
-                             flex: 1;
-                             text-align: right;
-                             font-weight: bold;
-                             color: #1e3c72;
-                         }
-                         
-                         .prodotto-details {
-                             flex: 2;
-                             text-align: center;
+                         .certification {
+                             background: #e9ecef;
+                             padding: 5px 12px;
+                             border-radius: 20px;
                              font-size: 12px;
-                             color: #666;
+                             font-weight: 600;
                          }
                          
-                         .totali-section {
-                             margin-top: 20px;
+                         .certification.bio {
+                             background: #dc3545;
+                             color: white;
+                         }
+                         
+                         .line-info {
+                             font-size: 14px;
+                             font-weight: 500;
+                             color: #6c757d;
+                         }
+                         
+                         .line-info.bio {
+                             color: #dc3545;
+                             font-weight: 600;
+                         }
+                         
+                         .supplier-body {
+                             padding: 20px;
+                         }
+                         
+                         .time-info {
+                             background: #e7f3ff;
                              padding: 15px;
-                             background: #f9f9f9;
                              border-radius: 8px;
-                             border: 2px solid #1e3c72;
+                             margin-bottom: 20px;
+                             display: flex;
+                             justify-content: space-around;
+                             align-items: center;
                          }
                          
-                         .totali-title {
-                             font-size: 16px;
-                             font-weight: bold;
-                             color: #1e3c72;
-                             margin-bottom: 10px;
+                         .time-item {
                              text-align: center;
                          }
                          
-                         .totale-row {
+                         .time-label {
+                             font-size: 12px;
+                             color: #6c757d;
+                             display: block;
+                         }
+                         
+                         .time-value {
+                             font-size: 18px;
+                             font-weight: 600;
+                             color: #1e3c72;
+                         }
+                         
+                         .products-section {
+                             margin-top: 20px;
+                         }
+                         
+                         .product-item {
+                             background: #f8f9fa;
+                             padding: 15px;
+                             border-radius: 8px;
+                             margin-bottom: 15px;
+                             border-left: 4px solid #28a745;
+                         }
+                         
+                         .product-item.bio-red {
+                             border-left-color: #dc3545;
+                         }
+                         
+                         .product-item.bio-black {
+                             border-left-color: #000;
+                         }
+                         
+                         .product-name {
+                             font-weight: 600;
+                             color: #333;
+                             margin-bottom: 10px;
                              display: flex;
                              justify-content: space-between;
-                             padding: 8px 0;
-                             border-bottom: 1px solid #ddd;
+                             align-items: center;
                          }
                          
-                         .totale-row:last-child {
-                             border-bottom: none;
+                         .product-quantity {
+                             background: #28a745;
+                             color: white;
+                             padding: 3px 10px;
+                             border-radius: 15px;
+                             font-size: 14px;
                          }
                          
-                         .totale-label {
-                             font-weight: 600;
-                             color: #555;
+                         .product-details {
+                             display: grid;
+                             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                             gap: 10px;
+                             margin-top: 10px;
+                             font-size: 13px;
                          }
                          
-                         .totale-value {
-                             font-weight: bold;
-                             color: #1e3c72;
-                             font-size: 18px;
+                         .detail-item {
+                             text-align: center;
+                             padding: 5px;
+                             background: white;
+                             border-radius: 5px;
                          }
                          
-                         .details-text {
+                         .detail-label {
                              font-size: 11px;
-                             color: #666;
+                             color: #6c757d;
+                             display: block;
+                         }
+                         
+                         .detail-value {
+                             font-weight: 600;
+                             color: #333;
+                         }
+                         
+                         .destination-info {
+                             margin-top: 10px;
+                             padding: 10px;
+                             background: white;
+                             border-radius: 5px;
+                             font-size: 13px;
+                         }
+                         
+                         .destination-label {
+                             font-weight: 600;
+                             color: #6c757d;
+                         }
+                         
+                         .notes {
+                             margin-top: 10px;
+                             font-style: italic;
+                             color: #6c757d;
+                             font-size: 12px;
+                         }
+                         
+                         .sum-info {
+                             background: #fff3cd;
+                             padding: 8px 12px;
+                             border-radius: 5px;
+                             font-size: 12px;
+                             margin-top: 5px;
+                             color: #856404;
+                             font-weight: 600;
+                         }
+                         
+                         .combination-info {
+                             background: #fff3cd;
+                             padding: 5px 10px;
+                             border-radius: 5px;
+                             font-size: 11px;
                              margin-top: 5px;
                          }
                          
-                         .note-section {
-                             margin-top: 15px;
-                             padding: 10px;
-                             background: #fffacd;
-                             border-left: 4px solid #ffc107;
+                         .footer {
+                             text-align: center;
+                             margin-top: 40px;
+                             padding: 20px;
+                             background: #f8f9fa;
+                             border-radius: 10px;
                              font-size: 12px;
+                             color: #6c757d;
                          }
                          
-                         .footer {
-                             margin-top: 30px;
-                             text-align: center;
-                             font-size: 11px;
-                             color: #666;
-                             border-top: 1px solid #ddd;
-                             padding-top: 10px;
+                         .revision-info {
+                             margin-top: 10px;
+                             font-weight: 600;
                          }
                          
                          @media print {
                              body {
-                                 -webkit-print-color-adjust: exact;
-                                 print-color-adjust: exact;
+                                 background: white;
                              }
                              
                              .container {
                                  max-width: 100%;
                              }
                              
-                             .fornitore-box {
+                             .supplier-card {
                                  break-inside: avoid;
+                                 page-break-inside: avoid;
+                             }
+                             
+                             .header {
+                                 background: #1e3c72 !important;
+                                 -webkit-print-color-adjust: exact;
+                                 print-color-adjust: exact;
                              }
                          }
                      </style>
@@ -2180,155 +2441,241 @@
                  <body>
                      <div class="container">
                          <div class="header">
-                             <h1>PROGRAMMA GIORNALIERO TRASFORMAZIONE FRUTTA</h1>
+                             <h1>Riepilogo Programma Giornaliero Trasformazione Frutta</h1>
+                             <h2>Sistema di Gestione Produzione - Simone Gatto</h2>
                              <div class="header-info">
-                                 <div class="info-box">
+                                 <div class="header-info-item">
                                      <strong>Data Lavorazione</strong>
-                                     <span>${data.dataLavorazione ? new Date(data.dataLavorazione).toLocaleDateString('it-IT') : '-'}</span>
+                                     <span>${data.dataLavorazione ? new Date(data.dataLavorazione).toLocaleDateString('it-IT') : 'Non specificata'}</span>
                                  </div>
-                                 <div class="info-box">
+                                 <div class="header-info-item">
                                      <strong>Tipo Agrume</strong>
-                                     <span>${data.tipoAgrume || '-'}</span>
+                                     <span>${data.tipoAgrume || 'Non specificato'}</span>
                                  </div>
-                                 <div class="info-box">
-                                     <strong>Quantità Totale</strong>
+                                 <div class="header-info-item">
+                                     <strong>Totale Trasformato</strong>
                                      <span>${data.trasformataTotale.toLocaleString()} kg</span>
                                  </div>
                              </div>
                          </div>
                          
-                         <div class="content">
-                             <div class="fornitori-grid">
+                         <div class="supplier-grid">
              `;
              
-             // Genera box per ogni fornitore
+             // Genera card per ogni fornitore
              data.fornitori.forEach((fornitore, index) => {
                  const nomeFornitore = fornitore.nome === 'ALTRO' ? fornitore.altroNome : fornitore.nome;
                  const isBio = ['BIO EU', 'BIO DEM', 'BIO NTD'].includes(fornitore.certificazione);
-                 const bioClass = isBio ? 'fornitore-bio' : '';
-                 const varietaText = fornitore.varieta && fornitore.varieta.length > 0 ? fornitore.varieta.join(', ') : '-';
+                 const bioClass = isBio ? 'bio' : '';
+                 const bioStatusPrima = fornitore.caratteristicheProdotti.prima.bio;
+                 const primaClass = isBio ? (bioStatusPrima === 'DECLASSATO' ? 'bio-black' : 'bio-red') : '';
                  
                  const orarioFineClean = fornitore.orarioFineDisplay ? 
                      fornitore.orarioFineDisplay.replace(/<[^>]*>/g, '').replace('del giorno', 'g.') : '';
                  
                  printContent += `
-                     <div class="fornitore-box">
-                         <div class="fornitore-header">
-                             <div class="fornitore-name ${bioClass}">${nomeFornitore || '-'}</div>
+                     <div class="supplier-card">
+                         <div class="supplier-header ${bioClass}">
+                             <div class="supplier-name ${bioClass}">${nomeFornitore || 'Non specificato'}</div>
+                             <div class="supplier-info">
+                                 <span class="certification ${bioClass}">${fornitore.certificazione || 'N/D'}</span>
+                                 <span class="line-info ${bioClass}">${fornitore.lineaTrasformazione || 'N/D'}</span>
+                             </div>
+                         </div>
+                         
+                         <div class="supplier-body">
                              <div class="time-info">
-                                 <strong>${fornitore.orarioInizio || '-'}</strong> → <strong>${orarioFineClean || '-'}</strong>
-                             </div>
-                         </div>
-                         
-                         <div class="prodotto-row">
-                             <div class="prodotto-label">Certificazione:</div>
-                             <div class="prodotto-value ${bioClass}">${fornitore.certificazione || '-'}</div>
-                             <div class="prodotto-details">Varietà: ${varietaText}</div>
-                         </div>
-                         
-                         <div class="prodotto-row">
-                             <div class="prodotto-label">Linea:</div>
-                             <div class="prodotto-value">${fornitore.lineaTrasformazione || '-'}</div>
-                             <div class="prodotto-details">Portata: ${fornitore.portataImpianto || '-'} kg/h</div>
-                         </div>
-                         
-                         <div class="prodotti-container">
-                             <div class="prodotto-row">
-                                 <div class="prodotto-label">Succo 1ª:</div>
-                                 <div class="prodotto-value">${fornitore.quantitaProdotti.prima} kg</div>
-                                 <div class="prodotto-details">
-                                     ${fornitore.destinazioni.prima || '-'}
-                                     ${fornitore.hasCombination ? '<br><em>Combinato</em>' : ''}
+                                 <div class="time-item">
+                                     <span class="time-label">Inizio</span>
+                                     <span class="time-value">${fornitore.orarioInizio || '-'}</span>
                                  </div>
-                             </div>
-                 `;
-                 
-                 // Per succo 2ª e torchiato, mostra solo se non è l'ultimo fornitore con somma automatica
-                 if (!fornitore.isAutoSum.seconda) {
-                     printContent += `
-                             <div class="prodotto-row">
-                                 <div class="prodotto-label">Succo 2ª:</div>
-                                 <div class="prodotto-value">${fornitore.quantitaProdotti.seconda} kg</div>
-                                 <div class="prodotto-details">${fornitore.destinazioni.seconda || '-'}</div>
-                             </div>
-                     `;
-                 }
-                 
-                 if (!fornitore.isAutoSum.torchiato) {
-                     printContent += `
-                             <div class="prodotto-row">
-                                 <div class="prodotto-label">Torchiato:</div>
-                                 <div class="prodotto-value">${fornitore.quantitaProdotti.torchiato} kg</div>
-                                 <div class="prodotto-details">${fornitore.destinazioni.torchiato || '-'}</div>
-                             </div>
-                     `;
-                 }
-                 
-                 printContent += `
-                         </div>
-                     </div>
-                 `;
-             });
-             
-             printContent += `
+                                 <div class="time-item">
+                                     <span class="time-label">Fine</span>
+                                     <span class="time-value">${orarioFineClean || '-'}</span>
+                                 </div>
                              </div>
                              
-                             <!-- Sezione Totali per Succo 2ª e Torchiato -->
-                             <div class="totali-section">
-                                 <div class="totali-title">RIEPILOGO TOTALI PRODUZIONE</div>
-                                 
-                                 <div class="totale-row">
-                                     <div class="totale-label">Totale Succo 2ª (tutti i fornitori)</div>
-                                     <div class="totale-value">${totalSeconda.toFixed(1)} kg</div>
-                                 </div>
-                                 ${detailsSeconda.length > 0 ? `
-                                     <div class="details-text">
-                                         Dettaglio: ${detailsSeconda.join(' + ')}
-                                     </div>
-                                 ` : ''}
-                                 
-                                 <div class="totale-row">
-                                     <div class="totale-label">Totale Torchiato (tutti i fornitori)</div>
-                                     <div class="totale-value">${totalTorchiato.toFixed(1)} kg</div>
-                                 </div>
-                                 ${detailsTorchiato.length > 0 ? `
-                                     <div class="details-text">
-                                         Dettaglio: ${detailsTorchiato.join(' + ')}
-                                     </div>
-                                 ` : ''}
-                             </div>
-             `;
-             
-             // Aggiungi eventuali note globali
-             const notesArray = [];
-             data.fornitori.forEach(fornitore => {
-                 if (fornitore.caratteristicheProdotti.prima.note) {
-                     notesArray.push(`Succo 1ª: ${fornitore.caratteristicheProdotti.prima.note}`);
-                 }
-                 if (fornitore.caratteristicheProdotti.seconda.note) {
-                     notesArray.push(`Succo 2ª: ${fornitore.caratteristicheProdotti.seconda.note}`);
-                 }
-                 if (fornitore.caratteristicheProdotti.torchiato.note) {
-                     notesArray.push(`Torchiato: ${fornitore.caratteristicheProdotti.torchiato.note}`);
-                 }
-             });
-             
-             if (notesArray.length > 0) {
+                             <div class="products-section">
+                 `;
+                 
+                 // Succo 1ª
                  printContent += `
-                     <div class="note-section">
-                         <strong>Note:</strong><br>
-                         ${notesArray.join('<br>')}
+                     <div class="product-item ${primaClass}">
+                         <div class="product-name">
+                             <span>Succo 1ª</span>
+                             <span class="product-quantity">${fornitore.quantitaProdotti.prima} kg</span>
+                         </div>
+                 `;
+                 
+                 if (fornitore.hasCombination) {
+                     printContent += `<div class="combination-info">Combinazione: ${data.lastCombinationSuppliers}</div>`;
+                 }
+                 
+                 printContent += `
+                         <div class="product-details">
+                             <div class="detail-item">
+                                 <span class="detail-label">Tenore Polpa</span>
+                                 <span class="detail-value">${fornitore.caratteristicheProdotti.prima.tenorePolpa || '-'}</span>
+                             </div>
+                             <div class="detail-item">
+                                 <span class="detail-label">Brix</span>
+                                 <span class="detail-value">${fornitore.caratteristicheProdotti.prima.brix || '-'}</span>
+                             </div>
+                             <div class="detail-item">
+                                 <span class="detail-label">Pastorizzato</span>
+                                 <span class="detail-value">${fornitore.caratteristicheProdotti.prima.pastorizzato || '-'}</span>
+                             </div>
+                             <div class="detail-item">
+                                 <span class="detail-label">Conservato</span>
+                                 <span class="detail-value">${fornitore.caratteristicheProdotti.prima.conservato || '-'}</span>
+                             </div>
+                         </div>
+                         <div class="destination-info">
+                             <span class="destination-label">Destinazione:</span> ${fornitore.destinazioni.prima || 'Non specificata'}
+                         </div>
+                 `;
+                 
+                 if (fornitore.caratteristicheProdotti.prima.note) {
+                     printContent += `<div class="notes">Note: ${fornitore.caratteristicheProdotti.prima.note}</div>`;
+                 }
+                 
+                 printContent += `</div>`;
+                 
+                 // Succo 2ª - Mostra solo totale se è l'ultimo fornitore e c'è auto-sum
+                 if (fornitore.isAutoSum.seconda && index === data.fornitori.length - 1) {
+                     printContent += `
+                         <div class="product-item">
+                             <div class="product-name">
+                                 <span>Succo 2ª - TOTALE FORNITORI</span>
+                                 <span class="product-quantity">${fornitore.quantitaProdotti.seconda} kg</span>
+                             </div>
+                     `;
+                     
+                     if (data.sumDetailsSeconda && data.sumDetailsSeconda.length > 1) {
+                         const detailsText = formatSumDetails(data.sumDetailsSeconda, 'seconda');
+                         printContent += `<div class="sum-info">Dettaglio: ${detailsText}</div>`;
+                     }
+                 } else if (!fornitore.isAutoSum.seconda && fornitore.quantitaProdotti.seconda > 0) {
+                     // Mostra normale solo se non è auto-sum
+                     printContent += `
+                         <div class="product-item">
+                             <div class="product-name">
+                                 <span>Succo 2ª</span>
+                                 <span class="product-quantity">${fornitore.quantitaProdotti.seconda} kg</span>
+                             </div>
+                     `;
+                 } else {
+                     // Non mostrare nulla per fornitori con auto-sum (tranne l'ultimo)
+                     printContent += '<!-- Succo 2ª incluso nel totale finale -->';
+                 }
+                 
+                 if ((!fornitore.isAutoSum.seconda && fornitore.quantitaProdotti.seconda > 0) || 
+                     (fornitore.isAutoSum.seconda && index === data.fornitori.length - 1)) {
+                     printContent += `
+                             <div class="product-details">
+                                 <div class="detail-item">
+                                     <span class="detail-label">Tenore Polpa</span>
+                                     <span class="detail-value">${fornitore.caratteristicheProdotti.seconda.tenorePolpa || '-'}</span>
+                                 </div>
+                                 <div class="detail-item">
+                                     <span class="detail-label">Brix</span>
+                                     <span class="detail-value">${fornitore.caratteristicheProdotti.seconda.brix || '-'}</span>
+                                 </div>
+                                 <div class="detail-item">
+                                     <span class="detail-label">Pastorizzato</span>
+                                     <span class="detail-value">${fornitore.caratteristicheProdotti.seconda.pastorizzato || '-'}</span>
+                                 </div>
+                                 <div class="detail-item">
+                                     <span class="detail-label">Conservato</span>
+                                     <span class="detail-value">${fornitore.caratteristicheProdotti.seconda.conservato || '-'}</span>
+                                 </div>
+                             </div>
+                             <div class="destination-info">
+                                 <span class="destination-label">Destinazione:</span> ${fornitore.destinazioni.seconda || 'Non specificata'}
+                             </div>
+                     `;
+                     
+                     if (fornitore.caratteristicheProdotti.seconda.note) {
+                         printContent += `<div class="notes">Note: ${fornitore.caratteristicheProdotti.seconda.note}</div>`;
+                     }
+                     
+                     printContent += `</div>`;
+                 }
+                 
+                 // Torchiato - Stessa logica del succo 2ª
+                 if (fornitore.isAutoSum.torchiato && index === data.fornitori.length - 1) {
+                     printContent += `
+                         <div class="product-item">
+                             <div class="product-name">
+                                 <span>Torchiato - TOTALE FORNITORI</span>
+                                 <span class="product-quantity">${fornitore.quantitaProdotti.torchiato} kg</span>
+                             </div>
+                     `;
+                     
+                     if (data.sumDetailsTorchiato && data.sumDetailsTorchiato.length > 1) {
+                         const detailsText = formatSumDetails(data.sumDetailsTorchiato, 'torchiato');
+                         printContent += `<div class="sum-info">Dettaglio: ${detailsText}</div>`;
+                     }
+                 } else if (!fornitore.isAutoSum.torchiato && fornitore.quantitaProdotti.torchiato > 0) {
+                     printContent += `
+                         <div class="product-item">
+                             <div class="product-name">
+                                 <span>Torchiato</span>
+                                 <span class="product-quantity">${fornitore.quantitaProdotti.torchiato} kg</span>
+                             </div>
+                     `;
+                 } else {
+                     printContent += '<!-- Torchiato incluso nel totale finale -->';
+                 }
+                 
+                 if ((!fornitore.isAutoSum.torchiato && fornitore.quantitaProdotti.torchiato > 0) || 
+                     (fornitore.isAutoSum.torchiato && index === data.fornitori.length - 1)) {
+                     printContent += `
+                             <div class="product-details">
+                                 <div class="detail-item">
+                                     <span class="detail-label">Tenore Polpa</span>
+                                     <span class="detail-value">${fornitore.caratteristicheProdotti.torchiato.tenorePolpa || '-'}</span>
+                                 </div>
+                                 <div class="detail-item">
+                                     <span class="detail-label">Brix</span>
+                                     <span class="detail-value">${fornitore.caratteristicheProdotti.torchiato.brix || '-'}</span>
+                                 </div>
+                                 <div class="detail-item">
+                                     <span class="detail-label">Pastorizzato</span>
+                                     <span class="detail-value">${fornitore.caratteristicheProdotti.torchiato.pastorizzato || '-'}</span>
+                                 </div>
+                                 <div class="detail-item">
+                                     <span class="detail-label">Conservato</span>
+                                     <span class="detail-value">${fornitore.caratteristicheProdotti.torchiato.conservato || '-'}</span>
+                                 </div>
+                             </div>
+                             <div class="destination-info">
+                                 <span class="destination-label">Destinazione:</span> ${fornitore.destinazioni.torchiato || 'Non specificata'}
+                             </div>
+                     `;
+                     
+                     if (fornitore.caratteristicheProdotti.torchiato.note) {
+                         printContent += `<div class="notes">Note: ${fornitore.caratteristicheProdotti.torchiato.note}</div>`;
+                     }
+                     
+                     printContent += `</div>`;
+                 }
+                 
+                 printContent += `
+                                 </div>
+                             </div>
+                         </div>
                      </div>
                  `;
-             }
+             });
              
              printContent += `
                          </div>
                          
                          <div class="footer">
-                             <p>Documento generato il ${new Date().toLocaleString('it-IT')}</p>
+                             <p>Documento generato automaticamente il ${new Date().toLocaleString('it-IT')}</p>
                              <p>Sistema di Gestione Produzione - Simone Gatto</p>
-                             <p>Ultima revisione: ${data.ultimaRevisione}</p>
+                             <p class="revision-info">Ultima revisione: ${data.ultimaRevisione}</p>
                          </div>
                      </div>
                  </body>
@@ -2338,154 +2685,6 @@
              printWindow.document.write(printContent);
              printWindow.document.close();
              printWindow.focus();
-         }
-         
-         // Gestione statistiche
-         $('#apri-statistiche').click(function() {
-             if ($('.supplier-row').length === 0) {
-                 alert('Aggiungi almeno un fornitore per visualizzare le statistiche');
-                 return;
-             }
-             
-             updateStatistics();
-             $('#stats-modal').fadeIn();
-         });
-         
-         $('.close-stats').click(function() {
-             $('#stats-modal').fadeOut();
-         });
-         
-         $(window).click(function(event) {
-             if (event.target.id === 'stats-modal') {
-                 $('#stats-modal').fadeOut();
-             }
-         });
-         
-         // Aggiorna statistiche
-         function updateStatistics() {
-             const data = collectProgramData();
-             
-             // Statistiche base
-             $('#stat-totale-kg').text(data.trasformataTotale.toLocaleString());
-             $('#stat-fornitori').text(data.fornitori.length);
-             
-             // Calcola resa media 1ª
-             let totalResaPrima = 0;
-             data.fornitori.forEach(f => totalResaPrima += f.rese.prima);
-             const resaMedia = data.fornitori.length > 0 ? 
-                 (totalResaPrima / data.fornitori.length).toFixed(1) + '%' : '0%';
-             $('#stat-resa-media').text(resaMedia);
-             
-             // Calcola percentuale BIO
-             const fornitoriBio = data.fornitori.filter(f => 
-                 ['BIO EU', 'BIO DEM', 'BIO NTD'].includes(f.certificazione)
-             ).length;
-             const percBio = data.fornitori.length > 0 ? 
-                 ((fornitoriBio / data.fornitori.length) * 100).toFixed(0) + '%' : '0%';
-             $('#stat-bio').text(percBio);
-             
-             // Prepara dati per grafici
-             const fornitoriLabels = [];
-             const fornitoriData = [];
-             const certificazioniCount = {};
-             
-             data.fornitori.forEach(fornitore => {
-                 const nome = fornitore.nome === 'ALTRO' ? fornitore.altroNome : fornitore.nome;
-                 fornitoriLabels.push(nome);
-                 fornitoriData.push(fornitore.quantitaTrasformata);
-                 
-                 const cert = fornitore.certificazione || 'Non specificata';
-                 certificazioniCount[cert] = (certificazioniCount[cert] || 0) + 1;
-             });
-             
-             // Grafico fornitori
-             if (chartFornitori) {
-                 chartFornitori.destroy();
-             }
-             
-             const ctxFornitori = document.getElementById('chart-fornitori').getContext('2d');
-             chartFornitori = new Chart(ctxFornitori, {
-                 type: 'bar',
-                 data: {
-                     labels: fornitoriLabels,
-                     datasets: [{
-                         label: 'Quantità Trasformata (kg)',
-                         data: fornitoriData,
-                         backgroundColor: 'rgba(42, 82, 152, 0.8)',
-                         borderColor: 'rgba(42, 82, 152, 1)',
-                         borderWidth: 1
-                     }]
-                 },
-                 options: {
-                     responsive: true,
-                     maintainAspectRatio: false,
-                     scales: {
-                         y: {
-                             beginAtZero: true
-                         }
-                     }
-                 }
-             });
-             
-             // Grafico certificazioni
-             if (chartCertificazioni) {
-                 chartCertificazioni.destroy();
-             }
-             
-             const ctxCertificazioni = document.getElementById('chart-certificazioni').getContext('2d');
-             chartCertificazioni = new Chart(ctxCertificazioni, {
-                 type: 'doughnut',
-                 data: {
-                     labels: Object.keys(certificazioniCount),
-                     datasets: [{
-                         data: Object.values(certificazioniCount),
-                         backgroundColor: [
-                             '#dc3545',
-                             '#28a745',
-                             '#ffc107',
-                             '#17a2b8',
-                             '#6c757d',
-                             '#e83e8c'
-                         ]
-                     }]
-                 },
-                 options: {
-                     responsive: true,
-                     maintainAspectRatio: false
-                 }
-             });
-             
-             // Grafico rese
-             if (chartRese) {
-                 chartRese.destroy();
-             }
-             
-             let totalePrima = 0, totaleSeconda = 0, totaleTorchiato = 0;
-             data.fornitori.forEach(f => {
-                 totalePrima += f.quantitaProdotti.prima;
-                 totaleSeconda += f.quantitaProdotti.seconda;
-                 totaleTorchiato += f.quantitaProdotti.torchiato;
-             });
-             
-             const ctxRese = document.getElementById('chart-rese').getContext('2d');
-             chartRese = new Chart(ctxRese, {
-                 type: 'pie',
-                 data: {
-                     labels: ['Succo 1ª', 'Succo 2ª', 'Torchiato'],
-                     datasets: [{
-                         data: [totalePrima, totaleSeconda, totaleTorchiato],
-                         backgroundColor: [
-                             '#2a5298',
-                             '#5cb85c',
-                             '#f0ad4e'
-                         ]
-                     }]
-                 },
-                 options: {
-                     responsive: true,
-                     maintainAspectRatio: false
-                 }
-             });
          }
          
          // Reset programma
