@@ -276,6 +276,7 @@
           background-color: rgba(0,0,0,0.5);
           display: none;
           z-index: 1000;
+          overflow-y: auto;
       }
       
       .stats-content {
@@ -285,9 +286,8 @@
           padding: 20px;
           width: 90%;
           max-width: 1400px;
-          height: 90%;
+          min-height: 90%;
           border-radius: 15px;
-          overflow-y: auto;
       }
       
       .stats-header {
@@ -468,6 +468,7 @@
                           <th>Q. Da trasformare (kg)</th>
                           <th>Giacenza (kg)</th>
                           <th>Certificazione</th>
+                          <th>Varietà</th>
                           <th>Linea</th>
                           <th>Inizio</th>
                           <th>Fine</th>
@@ -599,7 +600,7 @@
                   <input type="number" class="form-control calculated-field giacenza-fornitore" readonly>
               </div>
               
-              <div class="col-md-6">
+              <div class="col-md-4">
                   <label class="form-label">Certificazione Prodotto</label>
                   <select class="form-select certificazione-prodotto" required>
                       <option value="">Seleziona certificazione</option>
@@ -614,8 +615,23 @@
                   <input type="text" class="form-control mt-2 altra-certificazione hidden-field" placeholder="Specifica altra certificazione">
               </div>
               
+              <div class="col-md-4">
+                  <label class="form-label">Varietà</label>
+                  <select class="form-select varieta-prodotto" required>
+                      <option value="">Seleziona varietà</option>
+                      <option value="VERDELLO">Verdello</option>
+                      <option value="BIANCHETTO">Bianchetto</option>
+                      <option value="FEMMINELLO">Femminello</option>
+                      <option value="INTERDONATO">Interdonato</option>
+                      <option value="MONACHELLO">Monachello</option>
+                      <option value="DI SIRACUSA">Di Siracusa</option>
+                      <option value="ALTRO">Altro</option>
+                  </select>
+                  <input type="text" class="form-control mt-2 altra-varieta hidden-field" placeholder="Specifica altra varietà">
+              </div>
+              
               <!-- Parametri lavorazione -->
-              <div class="col-md-6">
+              <div class="col-md-4">
                   <label class="form-label">Linea di Trasformazione</label>
                   <select class="form-select linea-trasformazione" required>
                       <option value="">Seleziona linea</option>
@@ -699,21 +715,21 @@
                           <option value="NAT IN TINI">NAT IN TINI</option>
                           <option value="PET 100">PET 100</option>
                           <option value="PET 200">PET 200</option>
-                          <option value="PET 480">PET 480</option>
-                          <option value="ACMA">ACMA</option>
-                          <option value="REX">REX</option>
-                          <option value="GOGLIO">GOGLIO</option>
-                          <option value="VASCHETTE">VASCHETTE</option>
-                          <option value="VASCHETTE ZUCCHERATE">VASCHETTE ZUCCHERATE</option>
-                          <option value="LATTE">LATTE</option>
-                          <option value="F.F.">F.F.</option>
-                          <option value="F.T.C">F.T.C</option>
-                          <option value="FBL">FBL</option>
-                          <option value="BIC">BIC</option>
-                          <option value="CISTERNA P">CISTERNA P</option>
-                          <option value="CISTERNA EF">CISTERNA EF</option>
-                          <option value="CISTERNA VK">CISTERNA VK</option>
-                          <option value="CISTERNA GS">CISTERNA GS</option>
+                          <option value="PET 480">PET 480</option
+<option value="ACMA">ACMA</option>
+                         <option value="REX">REX</option>
+                         <option value="GOGLIO">GOGLIO</option>
+                         <option value="VASCHETTE">VASCHETTE</option>
+                         <option value="VASCHETTE ZUCCHERATE">VASCHETTE ZUCCHERATE</option>
+                         <option value="LATTE">LATTE</option>
+                         <option value="F.F.">F.F.</option>
+                         <option value="F.T.C">F.T.C</option>
+                         <option value="FBL">FBL</option>
+                         <option value="BIC">BIC</option>
+                         <option value="CISTERNA P">CISTERNA P</option>
+                         <option value="CISTERNA EF">CISTERNA EF</option>
+                         <option value="CISTERNA VK">CISTERNA VK</option>
+                         <option value="CISTERNA GS">CISTERNA GS</option>
                          <option value="CISTERNA CARTH.">CISTERNA CARTH.</option>
                          <option value="CONCENTRATO">CONCENTRATO</option>
                          <option value="ALTRO">ALTRO</option>
@@ -971,10 +987,10 @@
          function calculateAutoYields(agrume) {
              const yields = {
                  'LIMONE': { prima: 30, seconda: 10, torchiato: 5 },
-                 'ARANCIA': { prima: 35, seconda: 0, torchiato: 6 },
-                 'MANDARINO': { prima: 42, seconda: 0, torchiato: 4 },
-                 'POMPELMO': { prima: 30, seconda: 0, torchiato: 6 },
-                 'BERGAMOTTO': { prima: 30, seconda: 0, torchiato: 3 }
+                 'ARANCIA': { prima: 35, seconda: 12, torchiato: 6 },
+                 'MANDARINO': { prima: 42, seconda: 10, torchiato: 4 },
+                 'POMPELMO': { prima: 30, seconda: 15, torchiato: 6 },
+                 'BERGAMOTTO': { prima: 30, seconda: 8, torchiato: 3 }
              };
              return yields[agrume] || { prima: 45, seconda: 10, torchiato: 4 };
          }
@@ -1249,17 +1265,20 @@
              alert('Combinazione rimossa. I valori del succo 1ª sono stati ricalcolati in base alle rese.');
          }
          
-         // Aggiorna stili BIO per certificazione e linea
+         // Aggiorna stili BIO per certificazione, varietà e linea
          function updateBioStyles(supplierElement) {
              const certificazione = supplierElement.find('.certificazione-prodotto').val();
              const certificazioneField = supplierElement.find('.certificazione-prodotto');
+             const varietaField = supplierElement.find('.varieta-prodotto');
              const lineaField = supplierElement.find('.linea-trasformazione');
              
              certificazioneField.removeClass('bio-red-field');
+             varietaField.removeClass('bio-red-field');
              lineaField.removeClass('bio-red-field');
              
              if (['BIO EU', 'BIO DEM', 'BIO NTD'].includes(certificazione)) {
                  certificazioneField.addClass('bio-red-field');
+                 varietaField.addClass('bio-red-field');
                  lineaField.addClass('bio-red-field');
              }
          }
@@ -1304,7 +1323,7 @@
          function attachSupplierEvents(supplierElement) {
              const index = supplierElement.data('supplier-index');
              
-             // Gestione campo "ALTRO" per fornitore
+            // Gestione campo "ALTRO" per fornitore
              supplierElement.find('.nome-fornitore').change(function() {
                  const altroField = supplierElement.find('.altro-fornitore');
                  if ($(this).val() === 'ALTRO') {
@@ -1332,8 +1351,19 @@
                  updateSummaryTable();
              });
              
+             // Gestione campo "ALTRO" per varietà
+             supplierElement.find('.varieta-prodotto').change(function() {
+                 const altroField = supplierElement.find('.altra-varieta');
+                 if ($(this).val() === 'ALTRO') {
+                     altroField.removeClass('hidden-field');
+                 } else {
+                     altroField.addClass('hidden-field').val('');
+                 }
+                 updateSummaryTable();
+             });
+             
              // Gestione bio status per colori destinazione
-       supplierElement.find('.bio-prima').change(function() {
+             supplierElement.find('.bio-prima').change(function() {
                  updateDestinationColors(supplierElement);
              });
              
@@ -1595,6 +1625,9 @@
                  const quantitaTrasformata = $(this).find('.quantita-trasformata').val() || '0';
                  const giacenza = $(this).find('.giacenza-fornitore').val() || '0';
                  const certificazione = $(this).find('.certificazione-prodotto').val() || '';
+                 const varieta = $(this).find('.varieta-prodotto').val() || '';
+                 const altraVarieta = $(this).find('.altra-varieta').val();
+                 const nomeVarieta = varieta === 'ALTRO' ? altraVarieta : varieta;
                  const linea = $(this).find('.linea-trasformazione').val() || '';
                  const orarioInizio = $(this).find('.orario-inizio').val() || '';
                  const orarioFineDisplay = $(this).find('.orario-fine-display').html() || '';
@@ -1610,6 +1643,7 @@
                          certificazione;
                      
                      const certificationClass = isBioSpecific ? 'style="color: #dc3545; font-weight: bold;"' : '';
+                     const varietaClass = isBioSpecific ? 'style="color: #dc3545; font-weight: bold;"' : '';
                      const lineaClass = isBioSpecific ? 'style="color: #dc3545; font-weight: bold;"' : '';
                      
                      const row = `
@@ -1619,6 +1653,7 @@
                              <td><span class="badge bg-warning">${quantitaTrasformata} kg</span></td>
                              <td><span class="badge bg-info">${giacenza} kg</span></td>
                              <td ${certificationClass}>${certificationBadge}</td>
+                             <td ${varietaClass}>${nomeVarieta}</td>
                              <td><code ${lineaClass}>${linea}</code></td>
                              <td><span class="time-display">${orarioInizio}</span></td>
                              <td><span class="time-display">${orarioFineDisplay}</span></td>
@@ -1766,7 +1801,8 @@
                          label: 'Produzione oraria (kg)',
                          data: [],
                          borderColor: '#2a5298',
-                         fill: false,
+                         backgroundColor: 'rgba(42, 82, 152, 0.1)',
+                         fill: true,
                          tension: 0.1
                      }]
                  },
@@ -1922,7 +1958,148 @@
              charts.certificazioni.data.datasets[0].data = Object.values(certMap);
              charts.certificazioni.update();
              
-             // Altri aggiornamenti grafici...
+             // Aggiorna grafico timeline
+             const timelineData = generateTimelineData(data);
+             charts.timeline.data.labels = timelineData.labels;
+             charts.timeline.data.datasets[0].data = timelineData.data;
+             charts.timeline.update();
+             
+             // Aggiorna grafico efficienza linee
+             const efficienzaData = generateEfficienzaData(data);
+             charts.efficienza.data.labels = efficienzaData.labels;
+             charts.efficienza.data.datasets[0].data = efficienzaData.data;
+             charts.efficienza.update();
+             
+             // Aggiorna grafico destinazioni
+             const destinazioniData = generateDestinazioniData(data);
+             charts.destinazioni.data.labels = destinazioniData.labels;
+             charts.destinazioni.data.datasets = destinazioniData.datasets;
+             charts.destinazioni.update();
+         }
+         
+         function generateTimelineData(data) {
+             const labels = [];
+             const productionData = [];
+             
+             // Genera timeline oraria dalle 6:00 alle 22:00
+             for (let hour = 6; hour <= 22; hour++) {
+                 labels.push(`${hour}:00`);
+                 productionData.push(0);
+             }
+             
+             // Calcola produzione per ogni ora
+             data.fornitori.forEach(f => {
+                 if (f.orarioInizio && f.portataImpianto > 0) {
+                     const [startHour, startMin] = f.orarioInizio.split(':').map(Number);
+                     const durata = f.quantitaTrasformata / f.portataImpianto; // ore
+                     
+                     for (let i = 0; i < durata; i++) {
+                         const hourIndex = startHour + i - 6; // Adjust for array starting at 6:00
+                         if (hourIndex >= 0 && hourIndex < productionData.length) {
+                             productionData[hourIndex] += f.portataImpianto;
+                         }
+                     }
+                 }
+             });
+             
+             return { labels, data: productionData };
+         }
+         
+         function generateEfficienzaData(data) {
+             const lineaMap = {};
+             const lineaPortata = {};
+             
+             data.fornitori.forEach(f => {
+                 if (f.lineaTrasformazione) {
+                     if (!lineaMap[f.lineaTrasformazione]) {
+                         lineaMap[f.lineaTrasformazione] = 0;
+                         lineaPortata[f.lineaTrasformazione] = [];
+                     }
+                     lineaMap[f.lineaTrasformazione] += f.quantitaTrasformata;
+                     if (f.portataImpianto > 0) {
+                         lineaPortata[f.lineaTrasformazione].push(f.portataImpianto);
+                     }
+                 }
+             });
+             
+             const labels = Object.keys(lineaMap);
+             const efficienzaValues = labels.map(linea => {
+                 const portate = lineaPortata[linea];
+               if (portate.length > 0) {
+                     const avgPortata = portate.reduce((a, b) => a + b, 0) / portate.length;
+                     const teoricaMax = avgPortata * 16; // 16 ore di lavoro teoriche
+                     const effettiva = lineaMap[linea];
+                     return Math.min((effettiva / teoricaMax) * 100, 100);
+                 }
+                 return 0;
+             });
+             
+             return { labels, data: efficienzaValues };
+         }
+         
+         function generateDestinazioniData(data) {
+             const destinazioniMap = {
+                 prima: {},
+                 seconda: {},
+                 torchiato: {}
+             };
+             
+             // Raccogli dati destinazioni
+             data.fornitori.forEach(f => {
+                 // Prima
+                 if (f.destinazioni.prima) {
+                     const dests = f.destinazioni.prima.split(', ');
+                     dests.forEach(dest => {
+                         if (!destinazioniMap.prima[dest]) destinazioniMap.prima[dest] = 0;
+                         destinazioniMap.prima[dest] += f.quantitaProdotti.prima / dests.length;
+                     });
+                 }
+                 
+                 // Seconda
+                 if (f.destinazioni.seconda) {
+                     if (!destinazioniMap.seconda[f.destinazioni.seconda]) {
+                         destinazioniMap.seconda[f.destinazioni.seconda] = 0;
+                     }
+                     destinazioniMap.seconda[f.destinazioni.seconda] += f.quantitaProdotti.seconda;
+                 }
+                 
+                 // Torchiato
+                 if (f.destinazioni.torchiato) {
+                     if (!destinazioniMap.torchiato[f.destinazioni.torchiato]) {
+                         destinazioniMap.torchiato[f.destinazioni.torchiato] = 0;
+                     }
+                     destinazioniMap.torchiato[f.destinazioni.torchiato] += f.quantitaProdotti.torchiato;
+                 }
+             });
+             
+             // Crea dataset per grafico stacked
+             const allDestinations = new Set([
+                 ...Object.keys(destinazioniMap.prima),
+                 ...Object.keys(destinazioniMap.seconda),
+                 ...Object.keys(destinazioniMap.torchiato)
+             ]);
+             
+             const labels = Array.from(allDestinations);
+             
+             const datasets = [
+                 {
+                     label: 'Succo 1ª',
+                     data: labels.map(dest => destinazioniMap.prima[dest] || 0),
+                     backgroundColor: '#28a745'
+                 },
+                 {
+                     label: 'Succo 2ª',
+                     data: labels.map(dest => destinazioniMap.seconda[dest] || 0),
+                     backgroundColor: '#ffc107'
+                 },
+                 {
+                     label: 'Torchiato',
+                     data: labels.map(dest => destinazioniMap.torchiato[dest] || 0),
+                     backgroundColor: '#17a2b8'
+                 }
+             ];
+             
+             return { labels, datasets };
          }
          
          // Eventi principali
@@ -2052,7 +2229,9 @@
                      giacenza: parseFloat($(this).find('.giacenza-fornitore').val()) || 0,
                      certificazione: $(this).find('.certificazione-prodotto').val(),
                      altraCertificazione: $(this).find('.altra-certificazione').val(),
-                   lineaTrasformazione: $(this).find('.linea-trasformazione').val(),
+                     varieta: $(this).find('.varieta-prodotto').val(),
+                     altraVarieta: $(this).find('.altra-varieta').val(),
+                     lineaTrasformazione: $(this).find('.linea-trasformazione').val(),
                      portataImpianto: parseFloat($(this).find('.portata-impianto').val()) || 0,
                      orarioInizio: $(this).find('.orario-inizio').val(),
                      orarioFineDisplay: $(this).find('.orario-fine-display').html(),
@@ -2244,6 +2423,8 @@
                              justify-content: space-between;
                              align-items: center;
                              margin-top: 10px;
+                             flex-wrap: wrap;
+                             gap: 10px;
                          }
                          
                          .certification {
@@ -2257,6 +2438,17 @@
                          .certification.bio {
                              background: #dc3545;
                              color: white;
+                         }
+                         
+                         .varieta-info {
+                             font-size: 14px;
+                             font-weight: 500;
+                             color: #6c757d;
+                         }
+                         
+                         .varieta-info.bio {
+                             color: #dc3545;
+                             font-weight: 600;
                          }
                          
                          .line-info {
@@ -2465,6 +2657,7 @@
              // Genera card per ogni fornitore
              data.fornitori.forEach((fornitore, index) => {
                  const nomeFornitore = fornitore.nome === 'ALTRO' ? fornitore.altroNome : fornitore.nome;
+                 const nomeVarieta = fornitore.varieta === 'ALTRO' ? fornitore.altraVarieta : fornitore.varieta;
                  const isBio = ['BIO EU', 'BIO DEM', 'BIO NTD'].includes(fornitore.certificazione);
                  const bioClass = isBio ? 'bio' : '';
                  const bioStatusPrima = fornitore.caratteristicheProdotti.prima.bio;
@@ -2479,6 +2672,7 @@
                              <div class="supplier-name ${bioClass}">${nomeFornitore || 'Non specificato'}</div>
                              <div class="supplier-info">
                                  <span class="certification ${bioClass}">${fornitore.certificazione || 'N/D'}</span>
+                                 <span class="varieta-info ${bioClass}">${nomeVarieta || 'N/D'}</span>
                                  <span class="line-info ${bioClass}">${fornitore.lineaTrasformazione || 'N/D'}</span>
                              </div>
                          </div>
