@@ -715,8 +715,8 @@
                           <option value="NAT IN TINI">NAT IN TINI</option>
                           <option value="PET 100">PET 100</option>
                           <option value="PET 200">PET 200</option>
-                          <option value="PET 480">PET 480</option
-<option value="ACMA">ACMA</option>
+                          <option value="PET 480">PET 480</option>
+                         <option value="ACMA">ACMA</option>
                          <option value="REX">REX</option>
                          <option value="GOGLIO">GOGLIO</option>
                          <option value="VASCHETTE">VASCHETTE</option>
@@ -1144,7 +1144,7 @@
              }
          }
          
-         // Aggiorna opzioni select per combinazioni fornitori
+         // Aggiorna opzioni select per combinazioni fornitori - MODIFICATA per includere certificazione e linea
          function updateCombinazioneOptions() {
              const select = $('#combinazione-fornitori');
              
@@ -1156,9 +1156,16 @@
                  const fornitore = $(this).find('.nome-fornitore').val() || '';
                  const altroFornitore = $(this).find('.altro-fornitore').val();
                  const nomeFornitore = fornitore === 'ALTRO' ? altroFornitore : fornitore;
+                 const certificazione = $(this).find('.certificazione-prodotto').val() || '';
+                 const lineaTrasformazione = $(this).find('.linea-trasformazione').val() || '';
                  
                  if (nomeFornitore) {
-                     fornitori.push({ index: index, nome: nomeFornitore });
+                     fornitori.push({ 
+                         index: index, 
+                         nome: nomeFornitore,
+                         certificazione: certificazione,
+                         linea: lineaTrasformazione
+                     });
                  }
              });
              
@@ -1166,7 +1173,7 @@
              for (let i = 0; i < fornitori.length; i++) {
                  for (let j = i + 1; j < fornitori.length; j++) {
                      const combo = `${fornitori[i].index},${fornitori[j].index}`;
-                     const label = `${fornitori[i].nome} + ${fornitori[j].nome}`;
+                     const label = `${fornitori[i].nome} [${fornitori[i].certificazione}|${fornitori[i].linea}] + ${fornitori[j].nome} [${fornitori[j].certificazione}|${fornitori[j].linea}]`;
                      select.append(`<option value="${combo}">${label}</option>`);
                  }
              }
@@ -1174,7 +1181,7 @@
              // Combinazione di tutti i fornitori se ce ne sono più di 2
              if (fornitori.length > 2) {
                  const allIndexes = fornitori.map(f => f.index).join(',');
-                 const allNames = fornitori.map(f => f.nome).join(' + ');
+                 const allNames = fornitori.map(f => `${f.nome} [${f.certificazione}|${f.linea}]`).join(' + ');
                  select.append(`<option value="${allIndexes}">Tutti: ${allNames}</option>`);
              }
          }
@@ -1304,7 +1311,7 @@
              
              // Inizializza Select2 per destinazione multipla
              newSupplier.find('.destinazione-prima').select2({
-                 placeholder: "Seleziona fino a 3 destinazioni",
+               placeholder: "Seleziona fino a 3 destinazioni",
                  maximumSelectionLength: 3,
                  language: {
                      maximumSelected: function() {
@@ -1349,6 +1356,12 @@
                  updateDestinationColors(supplierElement);
                  updateBioStyles(supplierElement);
                  updateSummaryTable();
+                 updateCombinazioneOptions(); // Aggiunto per aggiornare combinazioni
+             });
+             
+             // Gestione linea di trasformazione
+             supplierElement.find('.linea-trasformazione').change(function() {
+                 updateCombinazioneOptions(); // Aggiunto per aggiornare combinazioni
              });
              
              // Gestione campo "ALTRO" per varietà
@@ -2003,7 +2016,7 @@
              });
              
              return { labels, data: productionData };
-         }
+           }
          
          function generateEfficienzaData(data) {
              const lineaMap = {};
@@ -2755,7 +2768,8 @@
                          <div class="product-item">
                              <div class="product-name">
                                  <span>Succo 2ª</span>
-                                 <span class="product-quantity">${fornitore.quantitaProdotti.seconda} kg</span>
+                                 <span class="product-quantity">${for
+                                   <span class="product-quantity">${fornitore.quantitaProdotti.seconda} kg</span>
                              </div>
                      `;
                  } else {
