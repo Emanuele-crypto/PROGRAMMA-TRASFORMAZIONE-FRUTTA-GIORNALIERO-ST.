@@ -714,7 +714,8 @@
                       <select class="form-select destinazione-prima" multiple>
                           <option value="NAT IN TINI">NAT IN TINI</option>
                           <option value="PET 100">PET 100</option>
-                          <option value="PET 200">PET 200</option><option value="PET 480">PET 480</option>
+                          <option value="PET 200">PET 200</option>
+                          <option value="PET 480">PET 480</option>
                          <option value="ACMA">ACMA</option>
                          <option value="REX">REX</option>
                          <option value="GOGLIO">GOGLIO</option>
@@ -1309,7 +1310,8 @@
              $('#fornitori-container').append(newSupplier);
              
              // Inizializza Select2 per destinazione multipla
-             newSupplier.find('.destinazione-prima').select2({placeholder: "Seleziona fino a 3 destinazioni",
+             newSupplier.find('.destinazione-prima').select2({
+               placeholder: "Seleziona fino a 3 destinazioni",
                  maximumSelectionLength: 3,
                  language: {
                      maximumSelected: function() {
@@ -2013,7 +2015,8 @@
                  }
              });
              
-             return { labels, data: productionData };}
+             return { labels, data: productionData };
+           }
          
          function generateEfficienzaData(data) {
              const lineaMap = {};
@@ -2765,7 +2768,7 @@
                          <div class="product-item">
                              <div class="product-name">
                                  <span>Succo 2ª</span>
-                                 <span class="product-quantity">${for<span class="product-quantity">${fornitore.quantitaProdotti.seconda} kg</span>
+                                <span class="product-quantity">${fornitore.quantitaProdotti.seconda} kg</span>
                              </div>
                      `;
                  } else {
