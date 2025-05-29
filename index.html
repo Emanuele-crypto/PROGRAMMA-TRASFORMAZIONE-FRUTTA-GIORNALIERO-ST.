@@ -735,7 +735,7 @@
              
              <div class="col-md-4">
                  <label class="form-label">Resa Torchiato (%)</label>
-                 <input type="number" class="form-control resa-torchiato" step="0.1" min="0" max="100" placeholder="Auto">
+                <input type="number" class="form-control resa-torchiato" step="0.1" min="0" max="100" placeholder="Auto">
             </div>
         </div>
         
@@ -1317,7 +1317,7 @@ $(document).ready(function() {
            sumDetailsSeconda = details.filter(d => d.linea === 'BOE/1100');
            sumDetailsTorchiato = details;
        }
-   }
+     }
    
    // Ottieni nomi fornitori dalla combinazione
    function getSupplierNamesFromCombo(comboValue) {
@@ -2631,13 +2631,13 @@ $(document).ready(function() {
        }
    });
    
-   // Anteprima stampa - MODIFICATA per includere colonna "Note"
+   // Anteprima stampa - MODIFICATA per includere colonna "Note" e aggiornare le righe delle combinazioni
    $('#anteprima-stampa').click(function() {
        const programData = collectProgramData();
        generateCompactPrintPreview(programData);
    });
    
-   // Generazione anteprima stampa compatta - MODIFICATA per combinazioni A e B e colonna Note
+   // Generazione anteprima stampa compatta - MODIFICATA per combinazioni A e B con totali corretti
    function generateCompactPrintPreview(data) {
        const printWindow = window.open('', '_blank');
        
@@ -2922,8 +2922,7 @@ $(document).ready(function() {
                    const destBioClass = bioStatus === 'SI' ? 'bio-cell' : bioClass;
                    
                    const certificationBadge = fullSupplierData.certificazione.includes('BIO') ? 
-                       `<span class="bio-indicator">${fullSupplierData.certificazione}</span>` : 
-                       fullSupplierData.certificazione;
+                       fullSupplierData.certificazione : fullSupplierData.certificazione;
                    
                    printContent += `
                        <tr class="combination-individual-a">
@@ -2949,32 +2948,88 @@ $(document).ready(function() {
                }
            });
            
-           // Poi aggiungi la riga totale combinazione A
+           // Poi aggiungi la riga totale combinazione A - MODIFICATA con totali corretti
            const totaleCombinazione = data.combinationDetailsA.reduce((sum, detail) => sum + parseFloat(detail.risultato), 0);
            const lastCombinationSupplier = data.fornitori.find(f => f.hasCombination && f.combinationType === 'a');
            
            if (lastCombinationSupplier) {
                const combinedNames = data.combinationDetailsA.map(d => `F${d.supplierIndex} - ${d.nome}`).join(' + ');
                
+               // Calcola totali per la riga di combinazione
+               const totalEntrata = data.combinationDetailsA.reduce((sum, detail) => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === detail.supplierIndex);
+                   return sum + (supplier ? supplier.quantitaEntrata : 0);
+               }, 0);
+               
+               const totalGiacenza = data.combinationDetailsA.reduce((sum, detail) => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === detail.supplierIndex);
+                   return sum + (supplier ? supplier.giacenza : 0);
+               }, 0);
+               
+               // Raccogli certificazioni, varietà e linee uniche
+               const uniqueCertificazioni = [...new Set(data.combinationDetailsA.map(d => d.certificazione))];
+               const uniqueVarieta = [...new Set(data.combinationDetailsA.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier ? (supplier.varieta === 'ALTRO' ? supplier.altraVarieta : supplier.varieta) : '';
+               }))];
+               const uniqueLinee = [...new Set(data.combinationDetailsA.map(d => d.linea))];
+               
+               // Raccogli destinazioni, polpa, brix, conservato, bio uniche
+               const uniqueDestinazioni = [...new Set(data.combinationDetailsA.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   if (supplier) {
+                       let dest = supplier.destinazioni.prima || 'N/D';
+                       if (dest.includes('ALTRO') && supplier.destinazioni.primaAltro) {
+                           dest = dest.replace('ALTRO', supplier.destinazioni.primaAltro);
+                       }
+                       return dest.split(', ').map(d => d.replace('CONCENTRATO', 'CONC').replace('NAT IN TINI', 'TINI')).join(',');
+                   }
+                   return '';
+               }))];
+               
+               const uniquePolpa = [...new Set(data.combinationDetailsA.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier?.caratteristicheProdotti?.prima?.tenorePolpa || 'N/D';
+               }))];
+               
+               const uniqueBrix = [...new Set(data.combinationDetailsA.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier?.caratteristicheProdotti?.prima?.brix || 'N/D';
+               }))];
+               
+               const uniqueConservato = [...new Set(data.combinationDetailsA.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier?.caratteristicheProdotti?.prima?.conservato || 'N/D';
+               }))];
+               
+               const uniqueBio = [...new Set(data.combinationDetailsA.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier?.caratteristicheProdotti?.prima?.bio || 'N/D';
+               }))];
+               
+               // Determina se usare colore rosso per Bio
+               const hasBioSI = uniqueBio.includes('SI');
+               const bioColorClass = hasBioSI ? 'bio-cell' : '';
+               
                printContent += `
                    <tr class="combination-group-a">
                        <td><strong>${combinedNames} (A)</strong></td>
-                       <td>-</td>
-                       <td>${lastCombinationSupplier.giacenza}</td>
-                       <td>MISTA</td>
-                       <td>MISTA</td>
-                       <td>MISTA</td>
+                       <td><strong>${totalEntrata.toFixed(0)}</strong></td>
+                       <td><strong>${totalGiacenza.toFixed(0)}</strong></td>
+                       <td>${uniqueCertificazioni.join('/')}</td>
+                       <td>${uniqueVarieta.join('/')}</td>
+                       <td>${uniqueLinee.join('/')}</td>
                        <td></td>
                        <td></td>
                        <td></td>
                        <td><strong>${totaleCombinazione.toFixed(1)} (CA)</strong></td>
                        <td>-</td>
+                       <td>${uniqueDestinazioni.join('/')}</td>
                        <td>-</td>
-                       <td>-</td>
-                       <td>-</td>
-                       <td>-</td>
-                       <td>-</td>
-                       <td>-</td>
+                       <td>${uniquePolpa.join('/')}</td>
+                       <td>${uniqueBrix.join('/')}</td>
+                       <td>${uniqueConservato.join('/')}</td>
+                       <td class="${bioColorClass}">${uniqueBio.join('/')}</td>
                    </tr>
                `;
            }
@@ -3020,8 +3075,7 @@ $(document).ready(function() {
                    const destBioClass = bioStatus === 'SI' ? 'bio-cell' : bioClass;
                    
                    const certificationBadge = fullSupplierData.certificazione.includes('BIO') ? 
-                       `<span class="bio-indicator">${fullSupplierData.certificazione}</span>` : 
-                       fullSupplierData.certificazione;
+                       fullSupplierData.certificazione : fullSupplierData.certificazione;
                    
                    printContent += `
                        <tr class="combination-individual-b">
@@ -3047,32 +3101,88 @@ $(document).ready(function() {
                }
            });
            
-           // Poi aggiungi la riga totale combinazione B
+           // Poi aggiungi la riga totale combinazione B - MODIFICATA con totali corretti
            const totaleCombinazione = data.combinationDetailsB.reduce((sum, detail) => sum + parseFloat(detail.risultato), 0);
            const lastCombinationSupplier = data.fornitori.find(f => f.hasCombination && f.combinationType === 'b');
            
            if (lastCombinationSupplier) {
                const combinedNames = data.combinationDetailsB.map(d => `F${d.supplierIndex} - ${d.nome}`).join(' + ');
                
+               // Calcola totali per la riga di combinazione
+               const totalEntrata = data.combinationDetailsB.reduce((sum, detail) => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === detail.supplierIndex);
+                   return sum + (supplier ? supplier.quantitaEntrata : 0);
+               }, 0);
+               
+               const totalGiacenza = data.combinationDetailsB.reduce((sum, detail) => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === detail.supplierIndex);
+                   return sum + (supplier ? supplier.giacenza : 0);
+               }, 0);
+               
+               // Raccogli certificazioni, varietà e linee uniche
+               const uniqueCertificazioni = [...new Set(data.combinationDetailsB.map(d => d.certificazione))];
+               const uniqueVarieta = [...new Set(data.combinationDetailsB.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier ? (supplier.varieta === 'ALTRO' ? supplier.altraVarieta : supplier.varieta) : '';
+               }))];
+               const uniqueLinee = [...new Set(data.combinationDetailsB.map(d => d.linea))];
+               
+               // Raccogli destinazioni, polpa, brix, conservato, bio uniche
+               const uniqueDestinazioni = [...new Set(data.combinationDetailsB.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   if (supplier) {
+                       let dest = supplier.destinazioni.prima || 'N/D';
+                       if (dest.includes('ALTRO') && supplier.destinazioni.primaAltro) {
+                           dest = dest.replace('ALTRO', supplier.destinazioni.primaAltro);
+                       }
+                       return dest.split(', ').map(d => d.replace('CONCENTRATO', 'CONC').replace('NAT IN TINI', 'TINI')).join(',');
+                   }
+                   return '';
+               }))];
+               
+               const uniquePolpa = [...new Set(data.combinationDetailsB.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier?.caratteristicheProdotti?.prima?.tenorePolpa || 'N/D';
+               }))];
+               
+               const uniqueBrix = [...new Set(data.combinationDetailsB.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier?.caratteristicheProdotti?.prima?.brix || 'N/D';
+               }))];
+               
+               const uniqueConservato = [...new Set(data.combinationDetailsB.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier?.caratteristicheProdotti?.prima?.conservato || 'N/D';
+               }))];
+               
+               const uniqueBio = [...new Set(data.combinationDetailsB.map(d => {
+                   const supplier = data.fornitori.find(f => f.supplierIndex === d.supplierIndex);
+                   return supplier?.caratteristicheProdotti?.prima?.bio || 'N/D';
+               }))];
+               
+               // Determina se usare colore rosso per Bio
+               const hasBioSI = uniqueBio.includes('SI');
+               const bioColorClass = hasBioSI ? 'bio-cell' : '';
+               
                printContent += `
                    <tr class="combination-group-b">
                        <td><strong>${combinedNames} (B)</strong></td>
-                       <td>-</td>
-                       <td>${lastCombinationSupplier.giacenza}</td>
-                       <td>MISTA</td>
-                       <td>MISTA</td>
-                       <td>MISTA</td>
+                       <td><strong>${totalEntrata.toFixed(0)}</strong></td>
+                       <td><strong>${totalGiacenza.toFixed(0)}</strong></td>
+                       <td>${uniqueCertificazioni.join('/')}</td>
+                       <td>${uniqueVarieta.join('/')}</td>
+                       <td>${uniqueLinee.join('/')}</td>
                        <td></td>
                        <td></td>
                        <td></td>
                        <td><strong>${totaleCombinazione.toFixed(1)} (CB)</strong></td>
                        <td>-</td>
+                       <td>${uniqueDestinazioni.join('/')}</td>
                        <td>-</td>
-                       <td>-</td>
-                       <td>-</td>
-                       <td>-</td>
-                       <td>-</td>
-                       <td>-</td>
+                       <td>${uniquePolpa.join('/')}</td>
+                       <td>${uniqueBrix.join('/')}</td>
+                       <td>${uniqueConservato.join('/')}</td>
+                       <td class="${bioColorClass}">${uniqueBio.join('/')}</td>
                    </tr>
                `;
            }
@@ -3081,8 +3191,7 @@ $(document).ready(function() {
        // Genera righe fornitori normali - evitando ripetizioni
        data.fornitori.forEach((fornitore) => {
            if (!fornitore.nome) return;
-           
-           const isInCombinationA = data.combinationSupplierIndexesA && 
+         const isInCombinationA = data.combinationSupplierIndexesA && 
                data.combinationSupplierIndexesA.includes(fornitore.supplierIndex);
            const isInCombinationB = data.combinationSupplierIndexesB && 
                data.combinationSupplierIndexesB.includes(fornitore.supplierIndex);
@@ -3122,8 +3231,7 @@ $(document).ready(function() {
                const destBioClass = bioStatus === 'SI' ? 'bio-cell' : bioClass;
                
                const certificationBadge = fornitore.certificazione.includes('BIO') ? 
-                   `<span class="bio-indicator">${fornitore.certificazione}</span>` : 
-                   fornitore.certificazione;
+                   fornitore.certificazione : fornitore.certificazione;
                
                printContent += `
                    <tr>
@@ -3199,6 +3307,7 @@ $(document).ready(function() {
                            <div class="summary-item">
                                <span>°BX:</span>
                                <span>${lastValidSupplierBOE.caratteristicheProdotti?.seconda?.brix || 'N/D'}</span>
+                           </div>
                            <div class="summary-item">
                                <span>Conservato:</span>
                                <span>${lastValidSupplierBOE.caratteristicheProdotti?.seconda?.conservato || 'N/D'}</span>
@@ -3359,7 +3468,7 @@ $(document).ready(function() {
    // Inizializzazione
    initCurrentDate();
    
-   console.log('Sistema Programma Giornaliero Trasformazione inizializzato con successo - Con varietà dinamiche per agrumi, colonna Note in stampa e rimozione logica concentrato');
+   console.log('Sistema Programma Giornaliero Trasformazione inizializzato con successo - Con varietà dinamiche per agrumi, colonna Note in stampa e righe combinazioni A/B corrette con totali');
 });
 </script>
 </body>
